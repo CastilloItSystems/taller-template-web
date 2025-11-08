@@ -4,7 +4,6 @@ import AppMenu from "./AppMenu";
 import { LayoutContext } from "./context/layoutcontext";
 import { MenuProvider } from "./context/menucontext";
 import { usePathname } from "next/navigation";
-import AppMenuWorkshop from "./AppMenuWorkshop";
 import AppMenuAutoSys from "./AppMenuAutoSys";
 
 const AppSidebar = () => {
