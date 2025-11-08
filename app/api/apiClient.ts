@@ -6,8 +6,9 @@ interface ExtendedUser {
 }
 // asdlasd
 const apiClient = axios.create({
-  //baseURL: "http://localhost:4000/api",
-  baseURL: "https://app-taller-97d415ecb8bf.herokuapp.com/api",
+  baseURL:
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://app-taller-97d415ecb8bf.herokuapp.com/api",
   headers: {
     "Content-Type": "application/json",
   },
