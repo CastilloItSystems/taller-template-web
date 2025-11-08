@@ -13,12 +13,17 @@ const AppMenuAutoSys = () => {
         {
           label: "Operaciones",
           icon: "pi pi-fw pi-home",
-          to: "/refineria",
+          to: "/",
         },
         {
           label: "Finanzas",
           icon: "pi pi-fw pi-image",
-          to: "/refineria/dashboard-sales",
+          to: "/",
+        },
+        {
+          label: "Ordenes de Trabajo",
+          icon: "pi pi-fw pi-file",
+          to: "/autosys/operation/workshop",
         },
       ],
     },
@@ -149,6 +154,42 @@ const AppMenuAutoSys = () => {
                   to: "/autosys/crm/vehiculos/modelos",
                 },
               ],
+            },
+          ],
+        },
+        {
+          label: "Taller",
+          icon: "pi pi-fw pi-wrench",
+          items: [
+            {
+              label: "Órdenes de Trabajo",
+              icon: "pi pi-fw pi-file-edit",
+              to: "/autosys/workshop",
+            },
+            {
+              label: "Facturas",
+              icon: "pi pi-fw pi-file",
+              to: "/autosys/workshop/invoices",
+            },
+            {
+              label: "Pagos",
+              icon: "pi pi-fw pi-money-bill",
+              to: "/autosys/workshop/payments",
+            },
+            {
+              label: "Servicios",
+              icon: "pi pi-fw pi-cog",
+              to: "/autosys/workshop/services",
+            },
+            {
+              label: "Categorías de Servicios",
+              icon: "pi pi-fw pi-tags",
+              to: "/autosys/workshop/service-categories",
+            },
+            {
+              label: "Subcategorías de Servicios",
+              icon: "pi pi-fw pi-tag",
+              to: "/autosys/workshop/service-subcategories",
             },
           ],
         },

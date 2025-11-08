@@ -13,4 +13,4 @@ export * from "./tipoProductoService";
 export * from "./torreDestilacionService";
 export * from "./partidaService";
 export * from "./refineriaService";
-export * from "./workshopService";
+export * from "./workshop";
