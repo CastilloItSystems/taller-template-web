@@ -43,8 +43,8 @@ const UsuarioList = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const usuariosDB = await getUsers();
-      const { usuarios } = usuariosDB;
-      setUsuarios(usuarios);
+      const { users } = usuariosDB;
+      setUsuarios(users);
       setLoading(false);
       initFilters();
     };

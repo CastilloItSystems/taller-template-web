@@ -1,8 +1,10 @@
+import { AutoSys } from "./autoSysInterface";
 import {
   HistorialCambio,
   Refineria,
   UserReference,
 } from "./configRefineriaInterface";
+import { Workshop } from "./workshopInterface";
 
 export interface AuthContextProps {
   children: React.ReactNode;
@@ -31,7 +33,10 @@ export interface Usuario {
   modificadoPor: UserReference;
   createdAt: string;
   historial: HistorialCambio[];
+  idWorkshop?: Workshop[];
   idRefineria?: Refineria[];
+  idAutoSys?: AutoSys[];
+
   departamento?: string[];
   img?: string;
   telefono: string;

@@ -3,9 +3,9 @@ import React, { useContext } from "react";
 import AppMenu from "./AppMenu";
 import { LayoutContext } from "./context/layoutcontext";
 import { MenuProvider } from "./context/menucontext";
-import AppMenuRefineria from "./AppMenuRefineria";
 import { usePathname } from "next/navigation";
-import AppMenuBunkering from "./AppMenuBunkering";
+import AppMenuWorkshop from "./AppMenuWorkshop";
+import AppMenuAutoSys from "./AppMenuAutoSys";
 
 const AppSidebar = () => {
   const { layoutConfig, setLayoutState } = useContext(LayoutContext);
@@ -19,11 +19,8 @@ const AppSidebar = () => {
   };
 
   const renderMenu = () => {
-    if (pathname.startsWith("/refineria")) {
-      return <AppMenuRefineria />;
-    } else if (pathname.startsWith("/bunkering")) {
-      // Aquí deberías crear un componente AppMenuBunkering similar a los otros menús
-      return <AppMenuBunkering />;
+    if (pathname.startsWith("/autosys")) {
+      return <AppMenuAutoSys />;
     } else {
       return <AppMenu />;
     }

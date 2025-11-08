@@ -12,3 +12,4 @@ export * from "./recepcionZodBK";
 export * from "./chequeosZodBK";
 export * from "./facturaZod";
 export * from "./balanceZod";
+export * from "./workshopZod";

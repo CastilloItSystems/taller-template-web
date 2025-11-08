@@ -218,10 +218,10 @@ const RegisterForm: Page = () => {
               style={{ fontSize: "3.5rem" }}
             />
           </div>
-          <h1 className="font-bold text-3xl text-900 m-0">MAROIL Refinery</h1>
+          <h1 className="font-bold text-3xl text-900 m-0">AutoSys</h1>
           <p className="text-color-secondary mt-2">
             Crea tu cuenta en la{" "}
-            <strong className="text-primary">Maroil Refinery</strong>
+            <strong className="text-primary">AutoSys</strong>
           </p>
         </div>
 
@@ -290,7 +290,7 @@ const RegisterForm: Page = () => {
                       <InputText
                         id="correo"
                         type="email"
-                        placeholder="usuario@maroil.com"
+                        placeholder="usuario@AutoSys.com"
                         className={classNames("w-full", {
                           "p-invalid": fieldState.error,
                           "pl-5": filledInput,
@@ -487,14 +487,14 @@ const RegisterForm: Page = () => {
                   style={{ maxHeight: "200px", overflowY: "auto" }}
                 >
                   <p className="text-sm">
-                    Al registrarte en MAROIL Refinery, aceptas nuestros términos
-                    y condiciones. Asegúrate de leer detenidamente toda la
+                    Al registrarte en AutoSys, aceptas nuestros términos y
+                    condiciones. Asegúrate de leer detenidamente toda la
                     información antes de continuar.
                   </p>
                   <p className="text-sm mt-2">
                     <strong>1. Uso de la plataforma:</strong> La plataforma está
                     destinada exclusivamente para uso interno de empleados y
-                    colaboradores autorizados de MAROIL Refinery.
+                    colaboradores autorizados de AutoSys.
                   </p>
                   <p className="text-sm mt-2">
                     <strong>2. Confidencialidad:</strong> Te comprometes a
@@ -621,7 +621,7 @@ const RegisterForm: Page = () => {
 
         <div className="text-center text-color-secondary mt-5">
           <p className="text-sm">
-            © {new Date().getFullYear()} MAROIL Refinery
+            © {new Date().getFullYear()} AutoSys
             <br />
             <span className="text-xs">Todos los derechos reservados</span>
           </p>

@@ -6,15 +6,15 @@ interface MainLayoutProps {
 }
 
 export const metadata: Metadata = {
-  title: "Maroil Trading",
-  description: "Maroil Trading Refinery.",
+  title: "AutoSys",
+  description: "AutoSys .",
   robots: { index: false, follow: false },
   viewport: { initialScale: 1, width: "device-width" },
   openGraph: {
     type: "website",
-    title: "Maroil Trading",
-    url: "https://www.maroil.com.ve",
-    description: "Maroil Trading Refinery.",
+    title: "AutoSys",
+    url: "https://www.AutoSys.com.ve",
+    description: "AutoSys .",
 
     ttl: 604800,
   },

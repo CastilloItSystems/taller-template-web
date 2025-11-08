@@ -92,10 +92,8 @@ const LoginForm: Page = () => {
               style={{ fontSize: "3.5rem" }}
             />
           </div>
-          <h1 className="font-bold text-3xl text-900 m-0">MAROIL Refinery</h1>
-          <p className="text-color-secondary mt-2">
-            Bienvenido a Maroil Refinery
-            </p>
+          <h1 className="font-bold text-3xl text-900 m-0">AutoSys</h1>
+          <p className="text-color-secondary mt-2">Bienvenido a AutoSys</p>
         </div>
 
         <form
@@ -118,7 +116,7 @@ const LoginForm: Page = () => {
               <InputText
                 id="correo"
                 type="email"
-                placeholder="usuario@maroil.com"
+                placeholder="usuario@AutoSys.com"
                 className={classNames("w-full", {
                   "p-invalid": errors.correo,
                   "pl-5": filledInput,
@@ -229,7 +227,7 @@ const LoginForm: Page = () => {
 
         <div className="text-center text-color-secondary mt-5">
           <p className="text-sm">
-            © {new Date().getFullYear()} MAROIL Refinery
+            © {new Date().getFullYear()} AutoSys
             <br />
             <span className="text-xs">Todos los derechos reservados</span>
           </p>

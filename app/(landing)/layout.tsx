@@ -6,8 +6,8 @@ interface LandingLayoutProps {
 }
 
 export const metadata: Metadata = {
-  title: "Maroil Trading",
-  description: "Maroil Trading Refinery.",
+  title: "AutoSys",
+  description: "AutoSys .",
 };
 
 export default function LandingLayout({ children }: LandingLayoutProps) {

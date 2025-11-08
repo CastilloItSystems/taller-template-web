@@ -12,7 +12,7 @@ import type {
 const defaultConfig: LayoutConfig = {
   ripple: true,
   inputStyle: "filled",
-  menuMode: "overlay",
+  menuMode: "static",
   colorScheme: "light",
   componentTheme: "blue",
   scale: 14,
@@ -176,13 +176,13 @@ export const LayoutProvider = (props: ChildContainerProps) => {
     <LayoutContext.Provider value={value as any}>
       <>
         <Head>
-          <title> Maroil Refinery</title>
+          <title> AutoSys</title>
           <meta charSet="UTF-8" />
-          <meta name="description" content="Maroil Refinery" />
+          <meta name="description" content="AutoSys" />
           <meta name="robots" content="index, follow" />
           <meta name="viewport" content="initial-scale=1, width=device-width" />
           <meta property="og:type" content="website"></meta>
-          <meta property="og:title" content="Maroil Refinery "></meta>
+          <meta property="og:title" content="AutoSys "></meta>
           <meta
             property="og:url"
             content="https://www.primefaces.org/verona-react"

@@ -12,16 +12,22 @@ const AppFooter = () => {
           src={
             "/layout/images/" +
             (layoutConfig.colorScheme === "light"
-              ? "maroilIcono"
-              : "maroilIcono") +
+              ? "logo-AutoSys"
+              : "logo-AutoSys") +
             ".ico"
           }
           alt="logo"
         />
-        <span className="app-name">Maroil Refinery</span>
+        <span className="app-name">AutoSys</span>
       </div>
       <div className="footer-right">
-        <span>© Maroil Automation</span>
+        <a
+          href="https://castilloitsystems.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          © Castillo It Systems
+        </a>
       </div>
     </div>
   );

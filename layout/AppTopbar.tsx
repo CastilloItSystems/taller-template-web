@@ -86,12 +86,12 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
       layoutConfig.layoutTheme === "primaryColor" &&
       layoutConfig.theme !== "yellow"
     ) {
-      logo = "maroilIcono.ico";
+      logo = "logo-AutoSys.ico";
     } else {
       logo =
         layoutConfig.colorScheme === "light"
-          ? "maroilIcono.ico"
-          : "maroilIcono.ico";
+          ? "logo-AutoSys.ico"
+          : "logo-AutoSys.ico";
     }
     return path + logo;
   };
@@ -118,7 +118,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     <div className="layout-topbar">
       <Link href={"/"} className="app-logo">
         <img alt="app logo" src={logo()} />
-        <span className="app-name">Maroil</span>
+        <span className="app-name">AutoSys</span>
       </Link>
 
       <button
