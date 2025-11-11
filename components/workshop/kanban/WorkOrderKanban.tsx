@@ -46,8 +46,10 @@ export default function WorkOrderKanban() {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(
     null
   );
-  const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(new Set());
-  
+  const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(
+    new Set()
+  );
+
   // Confirmation Dialog State
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false);
   const [pendingTransition, setPendingTransition] = useState<{
@@ -56,7 +58,7 @@ export default function WorkOrderKanban() {
     toStatus: any;
   } | null>(null);
   const [transitionData, setTransitionData] = useState<any>({});
-  
+
   const toast = useRef<Toast>(null);
 
   const sensors = useSensors(
@@ -112,9 +114,22 @@ export default function WorkOrderKanban() {
 
       setStatuses(sortedStatuses);
 
+      // Initialize collapsed columns based on status.collapsed property
+      const initiallyCollapsed = new Set<string>();
+      sortedStatuses.forEach((status: any) => {
+        if (status.collapsed === true) {
+          initiallyCollapsed.add(status._id);
+        }
+      });
+      setCollapsedColumns(initiallyCollapsed);
+
       console.log("✅ Estado final cargado:");
       console.log("   - Órdenes de trabajo:", workOrdersData.length);
       console.log("   - Estados activos:", sortedStatuses.length);
+      console.log(
+        "   - Columnas colapsadas inicialmente:",
+        initiallyCollapsed.size
+      );
 
       if (sortedStatuses.length === 0) {
         console.warn("⚠️ No se encontraron estados activos y no eliminados");
@@ -226,7 +241,7 @@ export default function WorkOrderKanban() {
     });
     setTransitionData({});
     setConfirmDialog(true);
-    
+
     console.log("✅ Modal de confirmación debería abrirse");
   };
 
@@ -237,12 +252,18 @@ export default function WorkOrderKanban() {
 
     // Update in backend
     try {
-      await changeWorkOrderStatus(workOrder._id!, toStatus._id);
+      const result = await changeWorkOrderStatus(
+        workOrder._id!,
+        toStatus.codigo,
+        transitionData.observaciones || ""
+      );
+
+      console.log("✅ Estado cambiado exitosamente:", result);
 
       toast.current?.show({
         severity: "success",
         summary: "Éxito",
-        detail: `Orden ${workOrder.numeroOrden} movida a ${toStatus.nombre}`,
+        detail: result.msg || `Orden ${workOrder.numeroOrden} movida a ${toStatus.nombre}`,
         life: 3000,
       });
 
@@ -253,12 +274,25 @@ export default function WorkOrderKanban() {
 
       // Reload to get fresh data
       loadData();
-    } catch (error) {
-      console.error("Error updating work order status:", error);
+    } catch (error: any) {
+      console.error("❌ Error updating work order status:", error);
+
+      let errorMessage = "Error al actualizar el estado de la orden";
+
+      if (error.response?.data?.msg) {
+        errorMessage = error.response.data.msg;
+      } else if (error.response?.status === 400) {
+        errorMessage = "Transición de estado no válida";
+      } else if (error.response?.status === 403) {
+        errorMessage = "No tienes permisos para cambiar el estado";
+      } else if (error.response?.status === 404) {
+        errorMessage = "Orden de trabajo no encontrada";
+      }
+
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: "Error al actualizar el estado de la orden",
+        detail: errorMessage,
         life: 3000,
       });
 
@@ -594,7 +628,8 @@ export default function WorkOrderKanban() {
                 <span
                   className="px-3 py-1 border-round font-semibold"
                   style={{
-                    backgroundColor: pendingTransition.fromStatus?.color || "#607D8B",
+                    backgroundColor:
+                      pendingTransition.fromStatus?.color || "#607D8B",
                     color: "#fff",
                   }}
                 >
@@ -604,7 +639,8 @@ export default function WorkOrderKanban() {
                 <span
                   className="px-3 py-1 border-round font-semibold"
                   style={{
-                    backgroundColor: pendingTransition.toStatus?.color || "#607D8B",
+                    backgroundColor:
+                      pendingTransition.toStatus?.color || "#607D8B",
                     color: "#fff",
                   }}
                 >
@@ -622,7 +658,9 @@ export default function WorkOrderKanban() {
                 <div key={field.name} className="field">
                   <label htmlFor={field.name}>
                     {field.label}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
+                    {field.required && (
+                      <span className="text-red-500 ml-1">*</span>
+                    )}
                   </label>
                   {field.type === "text" && (
                     <InputText
@@ -673,9 +711,10 @@ export default function WorkOrderKanban() {
             <div className="mt-3 p-3 bg-blue-50 border-round flex align-items-start gap-2">
               <i className="pi pi-info-circle text-blue-500 mt-1"></i>
               <div className="text-sm text-blue-900">
-                <strong>Nota:</strong> Esta es una vista de demostración. Los campos mostrados
-                son ejemplos y no afectan datos reales. En producción, estos campos se guardarían
-                junto con el cambio de estado.
+                <strong>Nota:</strong> Esta es una vista de demostración. Los
+                campos mostrados son ejemplos y no afectan datos reales. En
+                producción, estos campos se guardarían junto con el cambio de
+                estado.
               </div>
             </div>
           </div>

@@ -98,14 +98,20 @@ export const deleteWorkOrderItem = async (
 // Work Order Status Management
 export const changeWorkOrderStatus = async (
   id: string,
-  statusId: string,
+  newStatus: string,
   notes?: string
 ) => {
-  const response = await apiClient.put<{ success: boolean; data: WorkOrder }>(
-    `${BASE_URL}/${id}/estado`,
-    { estado: statusId, observaciones: notes }
-  );
-  return response.data.data;
+  const response = await apiClient.patch<{
+    success: boolean;
+    data: WorkOrder;
+    msg: string;
+    estadoAnterior: any;
+    estadoNuevo: any;
+  }>(`${BASE_URL}/${id}/status`, {
+    newStatus,
+    notes,
+  });
+  return response.data;
 };
 
 // Work Order Statuses CRUD

@@ -358,15 +358,25 @@ const WorkOrderList = () => {
       {/* Form Dialog */}
       <Dialog
         visible={formDialog}
-        style={{ width: "95vw", maxWidth: "1200px" }}
-        breakpoints={{ "960px": "90vw", "641px": "100vw" }}
+        style={{ width: "60vw" }}
+        // breakpoints={{ "960px": "90vw", "641px": "100vw" }}
         header={
-          workOrder ? "Editar Orden de Trabajo" : "Nueva Orden de Trabajo"
+          <div className="mb-2 text-center md:text-left">
+            <div className="border-bottom-2 border-primary pb-2">
+              <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                <i className="pi pi-tags mr-3 text-primary text-3xl"></i>
+                {workOrder
+                  ? "Modificar Orden de Trabajo"
+                  : "Crear Orden de Trabajo"}
+              </h2>
+            </div>
+          </div>
         }
         modal
         className="p-fluid"
         onHide={hideFormDialog}
         maximizable
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
         <WorkOrderForm
           workOrder={workOrder}
@@ -379,6 +389,16 @@ const WorkOrderList = () => {
         />
       </Dialog>
 
+      {/* <Dialog
+        visible={formDialog}
+        style={{ width: "600px" }}
+        header={invoice?._id ? "Editar Factura" : "Nueva Factura"}
+        modal
+        className="p-fluid"
+        onHide={hideDialog}
+        maximizable
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+      ></Dialog> */}
       {/* Delete Dialog */}
       <Dialog
         visible={deleteDialog}

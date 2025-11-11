@@ -2,6 +2,11 @@ import apiClient from "../apiClient";
 import { VehicleModel } from "@/libs/interfaces/inventory";
 import { VehicleModelFormData } from "@/libs/zods/inventory/vehicleZod";
 
+interface VehicleModelResponse {
+  msg: string;
+  vehicleModel: VehicleModel;
+}
+
 const BASE_URL = "/vehicles/models";
 
 export const getVehicleModel = async (id: string): Promise<VehicleModel> => {
@@ -18,7 +23,7 @@ export const getVehicleModels = async (): Promise<{
 
 export const createVehicleModel = async (
   data: VehicleModelFormData
-): Promise<VehicleModel> => {
+): Promise<VehicleModelResponse> => {
   const response = await apiClient.post(BASE_URL, data);
   return response.data;
 };
@@ -26,7 +31,7 @@ export const createVehicleModel = async (
 export const updateVehicleModel = async (
   id: string,
   data: VehicleModelFormData
-): Promise<VehicleModel> => {
+): Promise<VehicleModelResponse> => {
   const response = await apiClient.put(`${BASE_URL}/${id}`, data);
   return response.data;
 };

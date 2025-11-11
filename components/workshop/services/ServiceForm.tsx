@@ -1,21 +1,33 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+
+// Form libraries
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+// PrimeReact components
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { InputNumber } from "primereact/inputnumber";
+import {
+  InputNumber,
+  InputNumberValueChangeEvent,
+} from "primereact/inputnumber";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Chips } from "primereact/chips";
+import { ProgressSpinner } from "primereact/progressspinner";
+
+// Interfaces and schemas
 import {
   Service,
   ServiceCategory,
   ServiceSubcategory,
 } from "@/libs/interfaces/workshop";
 import { serviceSchema, ServiceFormData } from "@/libs/zods/workshop";
+
+// API functions
 import {
   createService,
   updateService,
@@ -36,12 +48,13 @@ export default function ServiceForm({
   onCancel,
   toast,
 }: ServiceFormProps) {
+  // Estado de loading controlado
+  const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [subcategories, setSubcategories] = useState<ServiceSubcategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
   const [loadingSubcategories, setLoadingSubcategories] =
     useState<boolean>(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 
   const {
     control,
@@ -73,12 +86,27 @@ export default function ServiceForm({
 
   const categoriaWatch = watch("categoria");
 
+  // Debug categoriaWatch changes
+  useEffect(() => {
+    console.log("=== CATEGORIA WATCH VALUE CHANGED ===");
+    console.log("categoriaWatch value:", categoriaWatch);
+    console.log("categoriaWatch type:", typeof categoriaWatch);
+  }, [categoriaWatch]);
+
+  // Simular loading inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     loadCategories();
   }, []);
 
   useEffect(() => {
-    if (service) {
+    if (service && !isLoading) {
       const categoriaId =
         typeof service.categoria === "string"
           ? service.categoria
@@ -89,8 +117,6 @@ export default function ServiceForm({
           ? service.subcategoria
           : service.subcategoria._id || ""
         : "";
-
-      setSelectedCategoryId(categoriaId);
 
       reset({
         codigo: service.codigo || "",
@@ -114,7 +140,7 @@ export default function ServiceForm({
       if (categoriaId) {
         loadSubcategories(categoriaId);
       }
-    } else {
+    } else if (!service && !isLoading) {
       reset({
         codigo: "",
         nombre: "",
@@ -132,17 +158,30 @@ export default function ServiceForm({
         piezasComunes: [],
         activo: true,
       });
+      setSubcategories([]);
     }
-  }, [service, reset]);
+  }, [service, reset, isLoading]);
 
   // Watch categoria changes to load subcategories
   useEffect(() => {
-    if (categoriaWatch && categoriaWatch !== selectedCategoryId) {
-      setSelectedCategoryId(categoriaWatch);
+    console.log("=== CATEGORIA WATCH EFFECT ===");
+    console.log(
+      "categoriaWatch:",
+      categoriaWatch,
+      "type:",
+      typeof categoriaWatch
+    );
+    console.log("Current subcategories before change:", subcategories.length);
+
+    if (categoriaWatch && categoriaWatch.trim() !== "") {
+      console.log("Loading subcategories for category:", categoriaWatch);
       setValue("subcategoria", ""); // Reset subcategory when category changes
       loadSubcategories(categoriaWatch);
+    } else {
+      console.log("Clearing subcategories - no category selected");
+      setSubcategories([]);
     }
-  }, [categoriaWatch, selectedCategoryId, setValue]);
+  }, [categoriaWatch]);
 
   const loadCategories = async () => {
     try {
@@ -162,21 +201,61 @@ export default function ServiceForm({
     }
   };
 
-  const loadSubcategories = async (categoriaId: string) => {
-    if (!categoriaId) {
+  const loadSubcategories = useCallback(async (categoriaId: string) => {
+    console.log("=== LOAD SUBCATEGORIES FUNCTION ===");
+    console.log("Input categoriaId:", categoriaId, "type:", typeof categoriaId);
+
+    if (!categoriaId || categoriaId.trim() === "") {
+      console.log("No categoriaId provided, clearing subcategories");
       setSubcategories([]);
       return;
     }
 
     try {
       setLoadingSubcategories(true);
-      const response = await getServiceSubcategories({
-        categoria: categoriaId,
+      console.log("Making API call to getServiceSubcategories with filters:", {
         activo: true,
       });
-      setSubcategories(response.data || []);
+
+      // Get all subcategories and filter on frontend since backend filtering might not work
+      const response = await getServiceSubcategories({
+        activo: true,
+      });
+
+      console.log("API Response received:");
+      console.log("Response success:", response.success);
+      console.log("Response data length (all):", response.data?.length || 0);
+
+      // Filter subcategories by category ID
+      const filteredSubcategories =
+        response.data?.filter((subcategory: ServiceSubcategory) => {
+          const subcategoryCategoryId =
+            typeof subcategory.categoria === "string"
+              ? subcategory.categoria
+              : subcategory.categoria._id;
+
+          const matches = subcategoryCategoryId === categoriaId;
+          console.log(
+            `Subcategory ${subcategory.nombre}: categoria=${subcategoryCategoryId} matches=${matches}`
+          );
+          return matches;
+        }) || [];
+
+      console.log(
+        "Filtered subcategories:",
+        filteredSubcategories.length,
+        "items"
+      );
+      console.log("Filtered data:", filteredSubcategories);
+
+      setSubcategories(filteredSubcategories);
+      console.log(
+        "Subcategories state updated with",
+        filteredSubcategories.length,
+        "filtered items"
+      );
     } catch (error) {
-      console.error("Error loading subcategories:", error);
+      console.error("Error in loadSubcategories:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -185,10 +264,14 @@ export default function ServiceForm({
       });
     } finally {
       setLoadingSubcategories(false);
+      console.log("Loading subcategories finished");
     }
-  };
+  }, []);
 
   const onSubmit = async (data: ServiceFormData) => {
+    console.log("Data being sent to API:", data);
+    console.log("Category ID:", data.categoria);
+    console.log("Subcategory ID:", data.subcategoria);
     try {
       if (service?._id) {
         await updateService(service._id, data);
@@ -251,432 +334,474 @@ export default function ServiceForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="p-fluid">
-      <div className="grid">
-        {/* Código */}
-        <div className="col-12 md:col-6">
-          <div className="field">
-            <label htmlFor="codigo" className="font-bold">
-              Código <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="codigo"
-              control={control}
-              render={({ field }) => (
-                <InputText
-                  id="codigo"
-                  {...field}
-                  placeholder="Ej: CAMBIO_ACEITE"
-                  className={errors.codigo ? "p-invalid" : ""}
-                  style={{ fontFamily: "monospace" }}
-                />
-              )}
-            />
-            {errors.codigo && (
-              <small className="p-error">{errors.codigo.message}</small>
-            )}
-          </div>
+      {isLoading ? (
+        <div className="flex flex-column align-items-center justify-content-center p-4">
+          <ProgressSpinner
+            style={{ width: "40px", height: "40px" }}
+            strokeWidth="4"
+            fill="var(--surface-ground)"
+            animationDuration=".5s"
+          />
+          <p className="mt-3 text-600 font-medium">Preparando formulario...</p>
         </div>
-
-        {/* Nombre */}
-        <div className="col-12 md:col-6">
-          <div className="field">
-            <label htmlFor="nombre" className="font-bold">
-              Nombre <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="nombre"
-              control={control}
-              render={({ field }) => (
-                <InputText
-                  id="nombre"
-                  {...field}
-                  placeholder="Ej: Cambio de Aceite"
-                  className={errors.nombre ? "p-invalid" : ""}
-                />
-              )}
-            />
-            {errors.nombre && (
-              <small className="p-error">{errors.nombre.message}</small>
-            )}
-          </div>
-        </div>
-
-        {/* Descripción */}
-        <div className="col-12">
-          <div className="field">
-            <label htmlFor="descripcion" className="font-bold">
-              Descripción <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="descripcion"
-              control={control}
-              render={({ field }) => (
-                <InputTextarea
-                  id="descripcion"
-                  {...field}
-                  rows={3}
-                  placeholder="Descripción detallada del servicio"
-                  className={errors.descripcion ? "p-invalid" : ""}
-                />
-              )}
-            />
-            {errors.descripcion && (
-              <small className="p-error">{errors.descripcion.message}</small>
-            )}
-          </div>
-        </div>
-
-        {/* Categoría */}
-        <div className="col-12 md:col-6">
-          <div className="field">
-            <label htmlFor="categoria" className="font-bold">
-              Categoría <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="categoria"
-              control={control}
-              render={({ field }) => (
-                <Dropdown
-                  id="categoria"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.value)}
-                  options={categories}
-                  optionLabel="nombre"
-                  optionValue="_id"
-                  placeholder="Seleccione una categoría"
-                  filter
-                  filterBy="nombre,codigo"
-                  emptyMessage="No hay categorías disponibles"
-                  emptyFilterMessage="No se encontraron categorías"
-                  className={errors.categoria ? "p-invalid" : ""}
-                  loading={loadingCategories}
-                  itemTemplate={categoryOptionTemplate}
-                  valueTemplate={(option, props) => {
-                    if (option) {
-                      const selectedCategory = categories.find(
-                        (c) => c._id === option
-                      );
-                      if (selectedCategory) {
-                        return categoryOptionTemplate(selectedCategory);
-                      }
+      ) : (
+        <>
+          <div className="grid">
+            {/* Código */}
+            <div className="col-12 md:col-6">
+              <label
+                htmlFor="codigo"
+                className="block text-900 font-medium mb-2"
+              >
+                Código <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="codigo"
+                control={control}
+                render={({ field }) => (
+                  <InputText
+                    id="codigo"
+                    value={field.value?.toUpperCase() || ""}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
                     }
-                    return <span>{props.placeholder}</span>;
-                  }}
-                />
+                    placeholder="Ej: CAMBIO_ACEITE"
+                    className={errors.codigo ? "p-invalid" : ""}
+                    style={{ fontFamily: "monospace" }}
+                  />
+                )}
+              />
+              {errors.codigo && (
+                <small className="p-error">{errors.codigo.message}</small>
               )}
-            />
-            {errors.categoria && (
-              <small className="p-error">{errors.categoria.message}</small>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Subcategoría */}
-        <div className="col-12 md:col-6">
-          <div className="field">
-            <label htmlFor="subcategoria" className="font-bold">
-              Subcategoría
-            </label>
-            <Controller
-              name="subcategoria"
-              control={control}
-              render={({ field }) => (
-                <Dropdown
-                  id="subcategoria"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.value)}
-                  options={subcategories}
-                  optionLabel="nombre"
-                  optionValue="_id"
-                  placeholder={
-                    selectedCategoryId
-                      ? "Seleccione una subcategoría"
-                      : "Primero seleccione una categoría"
-                  }
-                  filter
-                  filterBy="nombre,codigo"
-                  emptyMessage="No hay subcategorías disponibles"
-                  emptyFilterMessage="No se encontraron subcategorías"
-                  disabled={!selectedCategoryId}
-                  loading={loadingSubcategories}
-                />
+            {/* Nombre */}
+            <div className="col-12 md:col-6">
+              <label
+                htmlFor="nombre"
+                className="block text-900 font-medium mb-2"
+              >
+                Nombre <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="nombre"
+                control={control}
+                render={({ field }) => (
+                  <InputText
+                    id="nombre"
+                    {...field}
+                    placeholder="Ej: Cambio de Aceite"
+                    className={errors.nombre ? "p-invalid" : ""}
+                  />
+                )}
+              />
+              {errors.nombre && (
+                <small className="p-error">{errors.nombre.message}</small>
               )}
-            />
-            {errors.subcategoria && (
-              <small className="p-error">{errors.subcategoria.message}</small>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Precio Base */}
-        <div className="col-12 md:col-4">
-          <div className="field">
-            <label htmlFor="precioBase" className="font-bold">
-              Precio Base (VES) <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="precioBase"
-              control={control}
-              render={({ field }) => (
-                <InputNumber
-                  id="precioBase"
-                  value={field.value}
-                  onValueChange={(e) => field.onChange(e.value)}
-                  mode="currency"
-                  currency="VES"
-                  locale="es-VE"
-                  minFractionDigits={2}
-                  min={0}
-                  className={errors.precioBase ? "p-invalid" : ""}
-                />
+            {/* Descripción */}
+            <div className="col-12">
+              <label
+                htmlFor="descripcion"
+                className="block text-900 font-medium mb-2"
+              >
+                Descripción <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="descripcion"
+                control={control}
+                render={({ field }) => (
+                  <InputTextarea
+                    id="descripcion"
+                    {...field}
+                    rows={3}
+                    placeholder="Descripción detallada del servicio"
+                    className={errors.descripcion ? "p-invalid" : ""}
+                  />
+                )}
+              />
+              {errors.descripcion && (
+                <small className="p-error">{errors.descripcion.message}</small>
               )}
-            />
-            {errors.precioBase && (
-              <small className="p-error">{errors.precioBase.message}</small>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Tiempo Estimado */}
-        <div className="col-12 md:col-4">
-          <div className="field">
-            <label htmlFor="tiempoEstimadoMinutos" className="font-bold">
-              Tiempo Estimado <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="tiempoEstimadoMinutos"
-              control={control}
-              render={({ field }) => (
-                <InputNumber
-                  id="tiempoEstimadoMinutos"
-                  value={field.value}
-                  onValueChange={(e) => field.onChange(e.value)}
-                  showButtons
-                  min={1}
-                  suffix=" min"
-                  className={errors.tiempoEstimadoMinutos ? "p-invalid" : ""}
-                />
+            {/* Categoría */}
+            <div className="col-12 md:col-6">
+              <label
+                htmlFor="categoria"
+                className="block text-900 font-medium mb-2"
+              >
+                Categoría <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="categoria"
+                control={control}
+                render={({ field }) => (
+                  <Dropdown
+                    id="categoria"
+                    value={field.value}
+                    onChange={(e) => {
+                      console.log("=== CATEGORY DROPDOWN ONCHANGE ===");
+                      console.log(
+                        "Event value:",
+                        e.value,
+                        "type:",
+                        typeof e.value
+                      );
+                      console.log("Event target:", e.target);
+                      console.log("Event originalEvent:", e.originalEvent);
+                      field.onChange(e.value);
+                    }}
+                    options={categories}
+                    optionLabel="nombre"
+                    optionValue="_id"
+                    placeholder="Seleccione una categoría"
+                    filter
+                    filterBy="nombre,codigo"
+                    emptyMessage="No hay categorías disponibles"
+                    emptyFilterMessage="No se encontraron categorías"
+                    className={errors.categoria ? "p-invalid" : ""}
+                    loading={loadingCategories}
+                    itemTemplate={categoryOptionTemplate}
+                    showClear
+                  />
+                )}
+              />
+              {errors.categoria && (
+                <small className="p-error">
+                  {String(errors.categoria.message)}
+                </small>
               )}
-            />
-            {errors.tiempoEstimadoMinutos && (
-              <small className="p-error">
-                {errors.tiempoEstimadoMinutos.message}
+            </div>
+
+            {/* Subcategoría */}
+            <div className="col-12 md:col-6">
+              <label
+                htmlFor="subcategoria"
+                className="block text-900 font-medium mb-2"
+              >
+                Subcategoría
+              </label>
+              <Controller
+                name="subcategoria"
+                control={control}
+                render={({ field }) => (
+                  <Dropdown
+                    id="subcategoria"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.value)}
+                    options={subcategories}
+                    optionLabel="nombre"
+                    optionValue="_id"
+                    placeholder={
+                      categoriaWatch
+                        ? "Seleccione una subcategoría"
+                        : "Primero seleccione una categoría"
+                    }
+                    filter
+                    filterBy="nombre,codigo"
+                    emptyMessage="No hay subcategorías disponibles"
+                    emptyFilterMessage="No se encontraron subcategorías"
+                    disabled={!categoriaWatch}
+                    loading={loadingSubcategories}
+                  />
+                )}
+              />
+              {errors.subcategoria && (
+                <small className="p-error">{errors.subcategoria.message}</small>
+              )}
+            </div>
+
+            {/* Precio Base */}
+            <div className="col-12 md:col-4">
+              <label
+                htmlFor="precioBase"
+                className="block text-900 font-medium mb-2"
+              >
+                Precio Base <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="precioBase"
+                control={control}
+                render={({ field }) => (
+                  <InputNumber
+                    id="precioBase"
+                    value={field.value}
+                    onValueChange={(e) => field.onChange(e.value)}
+                    // mode="currency"
+                    // currency="VES"
+                    // locale="es-VE"
+                    minFractionDigits={2}
+                    min={0}
+                    className={errors.precioBase ? "p-invalid" : ""}
+                  />
+                )}
+              />
+              {errors.precioBase && (
+                <small className="p-error">{errors.precioBase.message}</small>
+              )}
+            </div>
+
+            {/* Tiempo Estimado */}
+            <div className="col-12 md:col-4">
+              <label
+                htmlFor="tiempoEstimadoMinutos"
+                className="block text-900 font-medium mb-2"
+              >
+                Tiempo Estimado <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="tiempoEstimadoMinutos"
+                control={control}
+                render={({ field }) => (
+                  <InputNumber
+                    id="tiempoEstimadoMinutos"
+                    value={field.value}
+                    onValueChange={(e) => field.onChange(e.value)}
+                    showButtons
+                    min={1}
+                    suffix=" min"
+                    className={errors.tiempoEstimadoMinutos ? "p-invalid" : ""}
+                  />
+                )}
+              />
+              {errors.tiempoEstimadoMinutos && (
+                <small className="p-error">
+                  {errors.tiempoEstimadoMinutos.message}
+                </small>
+              )}
+            </div>
+
+            {/* Unidad de Tiempo */}
+            <div className="col-12 md:col-4">
+              <label
+                htmlFor="unidadTiempo"
+                className="block text-900 font-medium mb-2"
+              >
+                Unidad de Tiempo
+              </label>
+              <Controller
+                name="unidadTiempo"
+                control={control}
+                render={({ field }) => (
+                  <Dropdown
+                    id="unidadTiempo"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.value)}
+                    options={unidadTiempoOptions}
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Seleccione unidad"
+                  />
+                )}
+              />
+            </div>
+
+            {/* Costo Hora Adicional */}
+            <div className="col-12 md:col-4">
+              <label
+                htmlFor="costoHoraAdicional"
+                className="block text-900 font-medium mb-2"
+              >
+                Costo Hora Adicional
+              </label>
+              <Controller
+                name="costoHoraAdicional"
+                control={control}
+                render={({ field }) => (
+                  // <InputNumber
+                  //   id="costoHoraAdicional"
+                  //   value={field.value}
+                  //   onValueChange={(e) => field.onChange(e.value)}
+                  //   mode="currency"
+                  //   currency="VES"
+                  //   locale="es-VE"
+                  //   minFractionDigits={2}
+                  //   min={0}
+                  // />
+                  <InputNumber
+                    inputId="currency-us"
+                    value={field.value}
+                    onValueChange={(e: InputNumberValueChangeEvent) =>
+                      field.onChange(e.value)
+                    }
+                    // mode="currency"
+                    // currency="USD"
+                    // locale="en-US"
+                  />
+                )}
+              />
+            </div>
+
+            {/* Dificultad */}
+            <div className="col-12 md:col-4">
+              <label
+                htmlFor="dificultad"
+                className="block text-900 font-medium mb-2"
+              >
+                Dificultad
+              </label>
+              <Controller
+                name="dificultad"
+                control={control}
+                render={({ field }) => (
+                  <Dropdown
+                    id="dificultad"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.value)}
+                    options={dificultadOptions}
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Seleccione dificultad"
+                  />
+                )}
+              />
+            </div>
+
+            {/* Garantía */}
+            <div className="col-12 md:col-4">
+              <label
+                htmlFor="garantiaMeses"
+                className="block text-900 font-medium mb-2"
+              >
+                Garantía (meses)
+              </label>
+              <Controller
+                name="garantiaMeses"
+                control={control}
+                render={({ field }) => (
+                  <InputNumber
+                    id="garantiaMeses"
+                    value={field.value}
+                    onValueChange={(e) => field.onChange(e.value)}
+                    showButtons
+                    min={0}
+                    suffix=" meses"
+                  />
+                )}
+              />
+            </div>
+
+            {/* Herramientas Requeridas */}
+            <div className="col-12 md:col-6">
+              <label
+                htmlFor="herramientasRequeridas"
+                className="block text-900 font-medium mb-2"
+              >
+                Herramientas Requeridas
+              </label>
+              <Controller
+                name="herramientasRequeridas"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    id="herramientasRequeridas"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.value)}
+                    placeholder="Presione Enter para agregar"
+                    separator=","
+                  />
+                )}
+              />
+              <small className="text-500">
+                Escriba y presione Enter para agregar cada herramienta
               </small>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Unidad de Tiempo */}
-        <div className="col-12 md:col-4">
-          <div className="field">
-            <label htmlFor="unidadTiempo" className="font-bold">
-              Unidad de Tiempo
-            </label>
-            <Controller
-              name="unidadTiempo"
-              control={control}
-              render={({ field }) => (
-                <Dropdown
-                  id="unidadTiempo"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.value)}
-                  options={unidadTiempoOptions}
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder="Seleccione unidad"
-                />
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Costo Hora Adicional */}
-        <div className="col-12 md:col-4">
-          <div className="field">
-            <label htmlFor="costoHoraAdicional" className="font-bold">
-              Costo Hora Adicional (VES)
-            </label>
-            <Controller
-              name="costoHoraAdicional"
-              control={control}
-              render={({ field }) => (
-                <InputNumber
-                  id="costoHoraAdicional"
-                  value={field.value}
-                  onValueChange={(e) => field.onChange(e.value)}
-                  mode="currency"
-                  currency="VES"
-                  locale="es-VE"
-                  minFractionDigits={2}
-                  min={0}
-                />
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Dificultad */}
-        <div className="col-12 md:col-4">
-          <div className="field">
-            <label htmlFor="dificultad" className="font-bold">
-              Dificultad
-            </label>
-            <Controller
-              name="dificultad"
-              control={control}
-              render={({ field }) => (
-                <Dropdown
-                  id="dificultad"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.value)}
-                  options={dificultadOptions}
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder="Seleccione dificultad"
-                />
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Garantía */}
-        <div className="col-12 md:col-4">
-          <div className="field">
-            <label htmlFor="garantiaMeses" className="font-bold">
-              Garantía (meses)
-            </label>
-            <Controller
-              name="garantiaMeses"
-              control={control}
-              render={({ field }) => (
-                <InputNumber
-                  id="garantiaMeses"
-                  value={field.value}
-                  onValueChange={(e) => field.onChange(e.value)}
-                  showButtons
-                  min={0}
-                  suffix=" meses"
-                />
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Herramientas Requeridas */}
-        <div className="col-12 md:col-6">
-          <div className="field">
-            <label htmlFor="herramientasRequeridas" className="font-bold">
-              Herramientas Requeridas
-            </label>
-            <Controller
-              name="herramientasRequeridas"
-              control={control}
-              render={({ field }) => (
-                <Chips
-                  id="herramientasRequeridas"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.value)}
-                  placeholder="Presione Enter para agregar"
-                  separator=","
-                />
-              )}
-            />
-            <small className="text-500">
-              Escriba y presione Enter para agregar cada herramienta
-            </small>
-          </div>
-        </div>
-
-        {/* Piezas Comunes */}
-        <div className="col-12 md:col-6">
-          <div className="field">
-            <label htmlFor="piezasComunes" className="font-bold">
-              Piezas Comunes
-            </label>
-            <Controller
-              name="piezasComunes"
-              control={control}
-              render={({ field }) => (
-                <Chips
-                  id="piezasComunes"
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.value)}
-                  placeholder="Presione Enter para agregar"
-                  separator=","
-                />
-              )}
-            />
-            <small className="text-500">
-              Escriba y presione Enter para agregar cada pieza
-            </small>
-          </div>
-        </div>
-
-        {/* Requiere Especialista */}
-        <div className="col-12 md:col-6">
-          <div className="field-checkbox">
-            <Controller
-              name="requiereEspecialista"
-              control={control}
-              render={({ field }) => (
-                <div className="flex align-items-center">
-                  <Checkbox
-                    inputId="requiereEspecialista"
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.checked)}
+            {/* Piezas Comunes */}
+            <div className="col-12 md:col-6">
+              <label
+                htmlFor="piezasComunes"
+                className="block text-900 font-medium mb-2"
+              >
+                Piezas Comunes
+              </label>
+              <Controller
+                name="piezasComunes"
+                control={control}
+                render={({ field }) => (
+                  <Chips
+                    id="piezasComunes"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.value)}
+                    placeholder="Presione Enter para agregar"
+                    separator=","
                   />
-                  <label
-                    htmlFor="requiereEspecialista"
-                    className="ml-2 font-bold"
-                  >
-                    Requiere Especialista
-                  </label>
-                </div>
-              )}
+                )}
+              />
+              <small className="text-500">
+                Escriba y presione Enter para agregar cada pieza
+              </small>
+            </div>
+
+            {/* Requiere Especialista */}
+            <div className="col-12 md:col-6">
+              <Controller
+                name="requiereEspecialista"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex align-items-center">
+                    <Checkbox
+                      inputId="requiereEspecialista"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.checked)}
+                    />
+                    <label
+                      htmlFor="requiereEspecialista"
+                      className="ml-2 text-900 font-medium"
+                    >
+                      Requiere Especialista
+                    </label>
+                  </div>
+                )}
+              />
+            </div>
+
+            {/* Activo */}
+            <div className="col-12 md:col-6">
+              <Controller
+                name="activo"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex align-items-center">
+                    <Checkbox
+                      inputId="activo"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.checked)}
+                    />
+                    <label
+                      htmlFor="activo"
+                      className="ml-2 text-900 font-medium"
+                    >
+                      Servicio activo
+                    </label>
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-content-end gap-2 mt-4">
+            <Button
+              label="Cancelar"
+              icon="pi pi-times"
+              severity="secondary"
+              onClick={onCancel}
+              type="button"
+              disabled={isSubmitting}
+            />
+            <Button
+              label={service?._id ? "Actualizar" : "Crear"}
+              icon="pi pi-check"
+              type="submit"
+              loading={isSubmitting}
             />
           </div>
-        </div>
-
-        {/* Activo */}
-        <div className="col-12 md:col-6">
-          <div className="field-checkbox">
-            <Controller
-              name="activo"
-              control={control}
-              render={({ field }) => (
-                <div className="flex align-items-center">
-                  <Checkbox
-                    inputId="activo"
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.checked)}
-                  />
-                  <label htmlFor="activo" className="ml-2 font-bold">
-                    Servicio activo
-                  </label>
-                </div>
-              )}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex justify-content-end gap-2 mt-4">
-        <Button
-          label="Cancelar"
-          icon="pi pi-times"
-          outlined
-          onClick={onCancel}
-          type="button"
-          disabled={isSubmitting}
-        />
-        <Button
-          label={service?._id ? "Actualizar" : "Crear"}
-          icon="pi pi-check"
-          type="submit"
-          loading={isSubmitting}
-        />
-      </div>
+        </>
+      )}
     </form>
   );
 }

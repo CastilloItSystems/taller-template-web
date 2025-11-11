@@ -268,7 +268,16 @@ export default function ServiceSubcategoryList() {
       <Dialog
         visible={formDialog}
         style={{ width: "600px" }}
-        header={subcategory?._id ? "Editar Subcategoría" : "Nueva Subcategoría"}
+        header={
+          <div className="mb-2 text-center md:text-left">
+            <div className="border-bottom-2 border-primary pb-2">
+              <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                <i className="pi pi-tags mr-3 text-primary text-3xl"></i>
+                {subcategory ? "Modificar Subcategoría" : "Crear Subcategoría"}
+              </h2>
+            </div>
+          </div>
+        }
         modal
         className="p-fluid"
         onHide={hideDialog}

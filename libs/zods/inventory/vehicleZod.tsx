@@ -17,7 +17,7 @@ export const vehicleBrandSchema = z.object({
 export const vehicleModelSchema = z.object({
   id: z.string().optional(),
   _id: z.string().optional(),
-  brand: z.union([z.string(), vehicleBrandSchema]),
+  brand: z.union([z.string().min(1, "Marca requerida"), vehicleBrandSchema]),
   nombre: z.string().min(2, "Nombre requerido").max(50, "Nombre muy largo"),
   tipo: z.enum([
     "sedan",
@@ -53,7 +53,7 @@ export const vehicleSchema = z.object({
   id: z.string().optional(),
   _id: z.string().optional(),
   customer: z.union([
-    z.string(),
+    z.string().min(1, "Cliente requerido"),
     z.object({
       id: z.string(),
       _id: z.string(),
@@ -64,7 +64,7 @@ export const vehicleSchema = z.object({
       nombreCompleto: z.string().optional(),
     }),
   ]),
-  model: z.union([z.string(), vehicleModelSchema]),
+  model: z.union([z.string().min(1, "Modelo requerido"), vehicleModelSchema]),
   year: z
     .number()
     .min(1900)

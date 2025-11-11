@@ -162,9 +162,19 @@ const AppMenuAutoSys = () => {
           icon: "pi pi-fw pi-wrench",
           items: [
             {
+              label: "Operaciones",
+              icon: "pi pi-fw pi-cog",
+              to: "/autosys/operation/service-bays",
+            },
+            {
               label: "Órdenes de Trabajo",
               icon: "pi pi-fw pi-file-edit",
               to: "/autosys/workshop",
+            },
+            {
+              label: "Gestión de Puestos",
+              icon: "pi pi-fw pi-sitemap",
+              to: "/autosys/workshop/service-bays",
             },
             {
               label: "Facturas",
@@ -190,6 +200,11 @@ const AppMenuAutoSys = () => {
               label: "Subcategorías de Servicios",
               icon: "pi pi-fw pi-tag",
               to: "/autosys/workshop/service-subcategories",
+            },
+            {
+              label: "Estados de Orden de Trabajo",
+              icon: "pi pi-fw pi-tags",
+              to: "/autosys/workshop/work-order-statuses",
             },
           ],
         },

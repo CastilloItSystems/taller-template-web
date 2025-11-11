@@ -230,21 +230,29 @@ const VehicleBrandList = () => {
         <Dialog
           visible={formDialog}
           style={{ width: "600px" }}
-          header={brand ? "Editar Marca" : "Crear Marca"}
+          header={
+            <div className="mb-2 text-center md:text-left">
+              <div className="border-bottom-2 border-primary pb-2">
+                <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                  <i className="pi pi-tag mr-3 text-primary text-3xl"></i>
+                  {brand ? "Modificar Marca" : "Crear Marca"}
+                </h2>
+              </div>
+            </div>
+          }
           modal
           onHide={hideFormDialog}
-          content={
-            <VehicleBrandForm
-              brand={brand}
-              hideFormDialog={hideFormDialog}
-              brands={brands}
-              setBrands={setBrands}
-              setBrand={setBrand}
-              showToast={showToast}
-              toast={toast}
-            />
-          }
-        ></Dialog>
+        >
+          <VehicleBrandForm
+            brand={brand}
+            hideFormDialog={hideFormDialog}
+            brands={brands}
+            setBrands={setBrands}
+            setBrand={setBrand}
+            showToast={showToast}
+            toast={toast}
+          />
+        </Dialog>
       </motion.div>
     </>
   );

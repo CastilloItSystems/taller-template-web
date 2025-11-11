@@ -317,7 +317,16 @@ export default function ServiceCategoryList() {
       <Dialog
         visible={formDialog}
         style={{ width: "600px" }}
-        header={category?._id ? "Editar Categoría" : "Nueva Categoría"}
+        header={
+          <div className="mb-2 text-center md:text-left">
+            <div className="border-bottom-2 border-primary pb-2">
+              <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                <i className="pi pi-tag mr-3 text-primary text-3xl"></i>
+                {category ? "Modificar Categoría" : "Crear Categoría"}
+              </h2>
+            </div>
+          </div>
+        }
         modal
         className="p-fluid"
         onHide={hideDialog}

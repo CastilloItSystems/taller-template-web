@@ -20,6 +20,7 @@ Documentación detallada de cada módulo funcional.
 - `crm/` - Módulo de CRM (Customer Relationship Management)
 - `sales/` - Módulo de ventas
 - `purchases/` - Módulo de compras
+- `SERVICE_BAYS.md` - **Módulo de Puestos de Servicio** (Bahías de Trabajo)
 
 ### `/api` - Documentación de APIs
 

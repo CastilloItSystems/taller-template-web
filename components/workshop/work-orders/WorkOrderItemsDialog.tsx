@@ -122,7 +122,16 @@ const WorkOrderItemsDialog = ({
 
   return (
     <Dialog
-      header={`Items - ${workOrderNumber}`}
+      header={
+        <div className="mb-2 text-center md:text-left">
+          <div className="border-bottom-2 border-primary pb-2">
+            <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+              <i className="pi pi-tags mr-3 text-primary text-3xl"></i>
+              {`Items - ${workOrderNumber}`}
+            </h2>
+          </div>
+        </div>
+      }
       visible={visible}
       onHide={onHide}
       style={{ width: "90vw" }}

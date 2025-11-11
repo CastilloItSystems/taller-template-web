@@ -343,7 +343,14 @@ const ServiceList = () => {
         visible={formDialog}
         style={{ width: "900px" }}
         header={
-          service?._id || service?.id ? "Editar Servicio" : "Nuevo Servicio"
+          <div className="mb-2 text-center md:text-left">
+            <div className="border-bottom-2 border-primary pb-2">
+              <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                <i className="pi pi-tags mr-3 text-primary text-3xl"></i>
+                {service ? "Modificar Servicio" : "Crear Servicio"}
+              </h2>
+            </div>
+          </div>
         }
         modal
         className="p-fluid"

@@ -8,16 +8,18 @@ export interface WorkOrderStatus {
   color?: string;
   icono?: string;
   orden?: number;
-  activo?: boolean;
-  eliminado?: boolean;
   tipo?: "inicial" | "intermedio" | "final" | "cancelado";
+  transicionesPermitidas?: string[];
   requiereAprobacion?: boolean;
   requiereDocumentacion?: boolean;
   notificarCliente?: boolean;
   notificarTecnico?: boolean;
-  transicionesPermitidas?: string[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  activo?: boolean;
+  eliminado?: boolean;
+  collapsed?: boolean;
+  __v?: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   id?: string;
 }
 
@@ -28,4 +30,23 @@ export interface WorkOrderStatusReference {
   color?: string;
   icono?: string;
   id: string;
+}
+
+// API Response interfaces
+export interface WorkOrderStatusResponse {
+  success: boolean;
+  data: WorkOrderStatus[];
+}
+
+export interface WorkOrderStatusSingleResponse {
+  success: boolean;
+  data: WorkOrderStatus;
+}
+
+// Filters interface
+export interface WorkOrderStatusFilters {
+  activo?: boolean;
+  tipo?: "inicial" | "intermedio" | "final" | "cancelado";
+  codigo?: string;
+  nombre?: string;
 }

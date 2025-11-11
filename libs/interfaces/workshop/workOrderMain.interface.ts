@@ -42,6 +42,7 @@ export interface RepuestoReference {
   codigo: string;
   nombre: string;
   id: string;
+  _id: string;
 }
 
 // Work Order Item Interface

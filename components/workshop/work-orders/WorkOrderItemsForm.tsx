@@ -1,5 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
+
+// Form libraries
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// PrimeReact components
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -8,7 +14,12 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
+import { ProgressSpinner } from "primereact/progressspinner";
+
+// Interfaces and schemas
 import { WorkOrderItem } from "@/libs/interfaces/workshop";
+
+// API functions
 import { getServices } from "@/app/api/workshop/serviceService";
 import { getItems } from "@/app/api/inventory/itemService";
 
@@ -17,11 +28,24 @@ interface WorkOrderItemsFormProps {
   onChange: (items: WorkOrderItem[]) => void;
 }
 
-const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
+/**
+ * Formulario para gestionar items de órdenes de trabajo.
+ * Permite agregar, editar y eliminar servicios y repuestos en una orden de trabajo.
+ */
+export default function WorkOrderItemsForm({
+  items,
+  onChange,
+}: WorkOrderItemsFormProps) {
+  // Estado de loading controlado
+  const [isLoading, setIsLoading] = useState(true);
   const [itemDialog, setItemDialog] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<WorkOrderItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<WorkOrderItem | null>(null);
   const [services, setServices] = useState<any[]>([]);
   const [repuestos, setRepuestos] = useState<any[]>([]);
+
+  // Form state
   const [itemType, setItemType] = useState<"servicio" | "repuesto">("servicio");
   const [selectedService, setSelectedService] = useState<any>(null);
   const [selectedRepuesto, setSelectedRepuesto] = useState<any>(null);
@@ -29,23 +53,64 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
   const [precioUnitario, setPrecioUnitario] = useState<number>(0);
   const [descuento, setDescuento] = useState<number>(0);
   const [descripcion, setDescripcion] = useState<string>("");
-  const [deleteDialog, setDeleteDialog] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<WorkOrderItem | null>(null);
+
+  // Simular loading inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     loadData();
   }, []);
 
+  /**
+   * Carga los datos iniciales del formulario (servicios y repuestos)
+   */
   const loadData = async () => {
     try {
+      console.log("=== LOADING DATA ===");
       const [servicesRes, itemsRes] = await Promise.all([
-        getServices(),
+        getServices({}),
         getItems(),
       ]);
-      setServices(Array.isArray(servicesRes.data) ? servicesRes.data : []);
-      setRepuestos(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+
+      console.log("Services response:", servicesRes);
+      console.log("Items response:", itemsRes);
+
+      // Handle services response
+      let servicesData: any[] = [];
+      if (
+        servicesRes &&
+        servicesRes.success &&
+        Array.isArray(servicesRes.data)
+      ) {
+        servicesData = servicesRes.data;
+      } else if (Array.isArray(servicesRes)) {
+        servicesData = servicesRes;
+      }
+
+      // Handle items response
+      let itemsData: any[] = [];
+      if (itemsRes && itemsRes.items && Array.isArray(itemsRes.items)) {
+        itemsData = itemsRes.items;
+      } else if (itemsRes && Array.isArray(itemsRes)) {
+        itemsData = itemsRes;
+      } else if (itemsRes && itemsRes.data && Array.isArray(itemsRes.data)) {
+        itemsData = itemsRes.data;
+      }
+
+      console.log("Final services data:", servicesData);
+      console.log("Final items data:", itemsData);
+
+      setServices(servicesData);
+      setRepuestos(itemsData);
     } catch (error) {
       console.error("Error loading data:", error);
+      setServices([]);
+      setRepuestos([]);
     }
   };
 
@@ -106,6 +171,7 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
           codigo: selectedRepuesto.codigo,
           nombre: selectedRepuesto.nombre,
           id: selectedRepuesto._id || selectedRepuesto.id,
+          _id: selectedRepuesto._id,
         },
         nombre: selectedRepuesto.nombre,
         descripcion: descripcion || selectedRepuesto.descripcion,
@@ -198,6 +264,7 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
           rounded
           outlined
           severity="danger"
+          type="button"
           onClick={() => confirmDeleteItem(rowData)}
         />
       </div>
@@ -221,10 +288,23 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
   const totals = calculateTotals();
 
   const dialogFooter = (
-    <>
-      <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
-      <Button label="Agregar" icon="pi pi-check" onClick={saveItem} />
-    </>
+    <div className="flex gap-2 my-4 w-full">
+      <Button
+        label="Cancelar"
+        icon="pi pi-times"
+        severity="secondary"
+        onClick={hideDialog}
+        type="button"
+        className="flex-1"
+        // disabled={submitting}
+      />
+      <Button
+        label="Guardar"
+        icon="pi pi-check"
+        onClick={saveItem}
+        className="flex-1"
+      />
+    </div>
   );
 
   const deleteDialogFooter = (
@@ -233,9 +313,16 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
         label="No"
         icon="pi pi-times"
         text
+        type="button"
         onClick={() => setDeleteDialog(false)}
       />
-      <Button label="Sí" icon="pi pi-check" text onClick={deleteItem} />
+      <Button
+        label="Sí"
+        icon="pi pi-check"
+        text
+        type="button"
+        onClick={deleteItem}
+      />
     </>
   );
 
@@ -247,6 +334,7 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
           label="Agregar Item"
           icon="pi pi-plus"
           size="small"
+          type="button"
           onClick={openNew}
         />
       </div>
@@ -328,7 +416,16 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
       <Dialog
         visible={itemDialog}
         style={{ width: "600px" }}
-        header="Agregar Item"
+        header={
+          <div className="mb-2 text-center md:text-left">
+            <div className="border-bottom-2 border-primary pb-2">
+              <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                <i className="pi pi-tags mr-3 text-primary text-3xl"></i>
+                Agregar Item
+              </h2>
+            </div>
+          </div>
+        }
         modal
         className="p-fluid"
         footer={dialogFooter}
@@ -498,6 +595,4 @@ const WorkOrderItemsForm = ({ items, onChange }: WorkOrderItemsFormProps) => {
       </Dialog>
     </div>
   );
-};
-
-export default WorkOrderItemsForm;
+}

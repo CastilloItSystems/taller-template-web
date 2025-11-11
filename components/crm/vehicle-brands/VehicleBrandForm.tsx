@@ -63,13 +63,13 @@ const VehicleBrandForm: React.FC<VehicleBrandFormProps> = ({
       if (brand) {
         const updatedBrand = await updateVehicleBrand(brand.id, data);
         const updatedBrands = brands.map((b) =>
-          b.id === brand.id ? updatedBrand : b
+          b.id === brand.id ? updatedBrand.vehicleBrand : b
         );
         setBrands(updatedBrands);
         showToast("success", "Éxito", "Marca actualizada correctamente");
       } else {
         const newBrand = await createVehicleBrand(data);
-        setBrands([...brands, newBrand]);
+        setBrands([...brands, newBrand.vehicleBrand]);
         showToast("success", "Éxito", "Marca creada correctamente");
       }
       hideFormDialog();
@@ -100,67 +100,60 @@ const VehicleBrandForm: React.FC<VehicleBrandFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="p-fluid">
-      <div className="card p-fluid surface-50 p-3 border-round shadow-2">
-        <div className="mb-2 text-center md:text-left">
-          <div className="border-bottom-2 border-primary pb-2">
-            <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
-              <i className="pi pi-tag mr-3 text-primary text-3xl"></i>
-              {brand ? "Modificar Marca" : "Crear Marca"}
-            </h2>
-          </div>
+      <div className="grid">
+        <div className="col-12">
+          <label htmlFor="nombre" className="block text-900 font-medium mb-2">
+            Nombre *
+          </label>
+          <Controller
+            name="nombre"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <InputText
+                  id={field.name}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className={classNames({
+                    "p-invalid": fieldState.error,
+                  })}
+                  placeholder="Nombre de la marca"
+                />
+                {getFormErrorMessage(field.name)}
+              </>
+            )}
+          />
         </div>
-        <div className="grid">
-          <div className="col-12">
-            <label htmlFor="nombre" className="block text-900 font-medium mb-2">
-              Nombre *
-            </label>
-            <Controller
-              name="nombre"
-              control={control}
-              render={({ field, fieldState }) => (
-                <>
-                  <InputText
-                    id={field.name}
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className={classNames({
-                      "p-invalid": fieldState.error,
-                    })}
-                    placeholder="Nombre de la marca"
-                  />
-                  {getFormErrorMessage(field.name)}
-                </>
-              )}
-            />
-          </div>
 
-          <div className="col-12 md:col-6">
-            <label
-              htmlFor="paisOrigen"
-              className="block text-900 font-medium mb-2"
-            >
-              País de Origen
-            </label>
-            <Controller
-              name="paisOrigen"
-              control={control}
-              render={({ field, fieldState }) => (
-                <>
-                  <InputText
-                    id={field.name}
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className={classNames({
-                      "p-invalid": fieldState.error,
-                    })}
-                    placeholder="País de origen (opcional)"
-                  />
-                  {getFormErrorMessage(field.name)}
-                </>
-              )}
-            />
-          </div>
+        <div className="col-12 md:col-6">
+          <label
+            htmlFor="paisOrigen"
+            className="block text-900 font-medium mb-2"
+          >
+            País de Origen
+          </label>
+          <Controller
+            name="paisOrigen"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <InputText
+                  id={field.name}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className={classNames({
+                    "p-invalid": fieldState.error,
+                  })}
+                  placeholder="País de origen (opcional)"
+                />
+                {getFormErrorMessage(field.name)}
+              </>
+            )}
+          />
+        </div>
 
+        {/* Estado - Solo visible al modificar */}
+        {brand && (
           <div className="col-12 md:col-6">
             <label htmlFor="estado" className="block text-900 font-medium mb-2">
               Estado *
@@ -188,47 +181,49 @@ const VehicleBrandForm: React.FC<VehicleBrandFormProps> = ({
               )}
             />
           </div>
+        )}
 
-          <div className="col-12">
-            <label htmlFor="logo" className="block text-900 font-medium mb-2">
-              Logo URL
-            </label>
-            <Controller
-              name="logo"
-              control={control}
-              render={({ field, fieldState }) => (
-                <>
-                  <InputText
-                    id={field.name}
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className={classNames({
-                      "p-invalid": fieldState.error,
-                    })}
-                    placeholder="URL del logo (opcional)"
-                  />
-                  {getFormErrorMessage(field.name)}
-                </>
-              )}
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-content-end gap-2 mt-4">
-          <Button
-            label="Cancelar"
-            icon="pi pi-times"
-            type="button"
-            outlined
-            onClick={hideFormDialog}
-          />
-          <Button
-            label={brand ? "Actualizar" : "Crear"}
-            icon="pi pi-check"
-            type="submit"
-            loading={loading}
+        <div className="col-12">
+          <label htmlFor="logo" className="block text-900 font-medium mb-2">
+            Logo URL
+          </label>
+          <Controller
+            name="logo"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <InputText
+                  id={field.name}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className={classNames({
+                    "p-invalid": fieldState.error,
+                  })}
+                  placeholder="URL del logo (opcional)"
+                />
+                {getFormErrorMessage(field.name)}
+              </>
+            )}
           />
         </div>
+      </div>
+
+      <div className="flex justify-content-end gap-2 mt-4">
+        <Button
+          label="Cancelar"
+          icon="pi pi-times"
+          severity="secondary"
+          onClick={hideFormDialog}
+          type="button"
+          disabled={loading}
+        />
+
+        <Button
+          label={brand ? "Actualizar" : "Crear"}
+          icon="pi pi-check"
+          type="submit"
+          loading={loading}
+        />
       </div>
     </form>
   );

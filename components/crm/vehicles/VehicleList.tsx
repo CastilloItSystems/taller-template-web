@@ -266,21 +266,29 @@ const VehicleList = () => {
         <Dialog
           visible={formDialog}
           style={{ width: "900px" }}
-          header={vehicle ? "Editar Vehículo" : "Crear Vehículo"}
+          header={
+            <div className="mb-2 text-center md:text-left">
+              <div className="border-bottom-2 border-primary pb-2">
+                <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                  <i className="pi pi-tag mr-3 text-primary text-3xl"></i>
+                  {vehicle ? "Modificar Vehículo" : "Crear Vehículo"}
+                </h2>
+              </div>
+            </div>
+          }
           modal
           onHide={hideFormDialog}
-          content={
-            <VehicleForm
-              vehicle={vehicle}
-              hideFormDialog={hideFormDialog}
-              vehicles={vehicles}
-              setVehicles={setVehicles}
-              setVehicle={setVehicle}
-              showToast={showToast}
-              toast={toast}
-            />
-          }
-        ></Dialog>
+        >
+          <VehicleForm
+            vehicle={vehicle}
+            hideFormDialog={hideFormDialog}
+            vehicles={vehicles}
+            setVehicles={setVehicles}
+            setVehicle={setVehicle}
+            showToast={showToast}
+            toast={toast}
+          />
+        </Dialog>
       </motion.div>
     </>
   );
