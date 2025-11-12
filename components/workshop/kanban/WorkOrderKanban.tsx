@@ -263,7 +263,9 @@ export default function WorkOrderKanban() {
       toast.current?.show({
         severity: "success",
         summary: "Éxito",
-        detail: result.msg || `Orden ${workOrder.numeroOrden} movida a ${toStatus.nombre}`,
+        detail:
+          result.msg ||
+          `Orden ${workOrder.numeroOrden} movida a ${toStatus.nombre}`,
         life: 3000,
       });
 

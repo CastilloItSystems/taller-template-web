@@ -295,7 +295,7 @@ const SalesOrderList = () => {
         >
           <Column body={actionBodyTemplate} style={{ width: "150px" }} />
           <Column field="numero" header="Número" sortable />
-          <Column field="cliente" header="Cliente" sortable />
+          <Column field="cliente.nombre" header="Cliente" sortable />
           <Column field="fecha" header="Fecha" sortable />
           <Column
             field="items"
