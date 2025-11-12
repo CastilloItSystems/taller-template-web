@@ -1,3 +1,5 @@
+import { Customer } from "./customer.interface";
+
 export type PurchaseOrderStatus =
   | "pendiente"
   | "parcial"
@@ -14,7 +16,7 @@ export interface PurchaseOrderLine {
 export interface PurchaseOrder {
   id: string;
   numero: string; // unique, required
-  proveedor: string; // Supplier id
+  proveedor: Customer; // Supplier id
   fecha?: string;
   items: PurchaseOrderLine[]; // array requerida
   estado?: PurchaseOrderStatus; // default: 'pendiente'

@@ -1,3 +1,5 @@
+import { Customer } from "./customer.interface";
+
 export type SalesOrderStatus =
   | "borrador"
   | "pendiente"
@@ -36,22 +38,22 @@ export interface SalesReservation {
 export interface SalesOrder {
   id: string;
   numero: string; // unique
-  cliente?: string;
+  cliente?: Customer;
   fecha: string;
   estado: SalesOrderStatus;
   items: SalesLine[];
   reservations?: SalesReservation[];
-  
+
   // Idempotency keys
   confirmIdempotencyKey?: string;
   shipIdempotencyKey?: string;
   cancelIdempotencyKey?: string;
-  
+
   // Tracking dates
   fechaConfirmacion?: string;
   fechaDespacho?: string;
   fechaCancelacion?: string;
-  
+
   // Audit
   creadoPor?: string;
   eliminado?: boolean;

@@ -9,219 +9,337 @@ const AppMenuAutoSys = () => {
   const { activeAutoSys } = useAutoSysStore();
   const { obtenerEstadisticas } = useVentasStore();
   const estadisticas = obtenerEstadisticas();
+
   const model: MenuModel[] = [
+    // =============================================
+    // DASHBOARDS Y OPERACIONES PRINCIPALES
+    // =============================================
     {
-      label: activeAutoSys?.nombre || "Seleciona un autoSys",
+      label: activeAutoSys?.nombre || "Selecciona un AutoSys",
       icon: "pi pi-home",
       items: [
         {
-          label: "Operaciones",
-          icon: "pi pi-fw pi-home",
-          to: "/",
+          label: "Dashboard de Operaciones",
+          icon: "pi pi-fw pi-chart-line",
+          to: "/autosys/operation",
         },
         {
-          label: "Finanzas",
-          icon: "pi pi-fw pi-image",
-          to: "/",
+          label: "Dashboard de Finanzas",
+          icon: "pi pi-fw pi-dollar",
+          to: "/autosys/finance",
         },
         {
-          label: "Ordenes de Trabajo",
-          icon: "pi pi-fw pi-file",
-          to: "/autosys/operation/workshop",
-        },
-        {
-          label: "Concesionario",
-          icon: "pi pi-fw pi-car",
-          to: "/autosys/concesionario",
-        },
-        {
-          label: "Ventas",
+          label: "Dashboard de Ventas",
           icon: "pi pi-fw pi-shopping-cart",
           to: "/autosys/ventas",
           badge:
             estadisticas.pendientes > 0 ? estadisticas.pendientes : undefined,
           badgeClassName: "p-badge-danger",
         },
+
+        {
+          label: "Inicio",
+          icon: "pi pi-fw pi-home",
+          to: "/",
+        },
       ],
     },
 
+    // =============================================
+    // MÓDULOS
+    // =============================================
     {
-      label: "Gestión de " + activeAutoSys?.nombre,
-      icon: "pi pi-fw pi-building", // Cambiado a un icono más representativo de empresa
+      label: "modulos",
+      icon: "pi pi-fw pi-align-left",
       items: [
+        // =============================================
+        // MÓDULO: INVENTARIO
+        // =============================================
         {
-          label: "Configuración",
-          icon: "pi pi-fw pi-cog",
-          items: [],
-        },
-        {
-          label: "Finanzas",
-          icon: "pi pi-fw pi-dollar",
-          items: [
-            {
-              label: "Contactos",
-              icon: "pi pi-fw pi-id-card",
-              to: "/bunkering/contacto",
-            },
-            {
-              label: "Contrato Compra",
-              icon: "pi pi-fw pi-briefcase",
-              to: "/bunkering/contrato-compra",
-            },
-            {
-              label: "Contrato Venta",
-              icon: "pi pi-fw pi-briefcase",
-              to: "/bunkering/contrato-venta",
-            },
-          ],
-        },
-
-        {
-          label: "Inventario",
+          label: "inventario",
           icon: "pi pi-fw pi-box",
           items: [
             {
-              label: "Almacenes",
-              icon: "pi pi-fw pi-database",
-              to: "/autosys/inventario/almacenes",
-            },
-            {
-              label: "Proveedores",
-              icon: "pi pi-fw pi-users",
-              to: "/autosys/inventario/proveedores",
-            },
-            {
-              label: "Categorías",
-              icon: "pi pi-fw pi-tags",
-              to: "/autosys/inventario/categorias",
-            },
-            {
-              label: "Marcas",
-              icon: "pi pi-fw pi-flag",
-              to: "/autosys/inventario/marcas",
-            },
-            {
-              label: "Modelos",
-              icon: "pi pi-fw pi-book",
-              to: "/autosys/inventario/modelos",
-            },
-            {
-              label: "Unidades",
-              icon: "pi pi-fw pi-box",
-              to: "/autosys/inventario/unidades",
-            },
-            {
-              label: "Artículos",
-              icon: "pi pi-fw pi-box",
-              to: "/autosys/inventario/items",
-            },
-            {
-              label: "Stock",
-              icon: "pi pi-fw pi-chart-bar",
-              to: "/autosys/inventario/stock",
-            },
-            {
-              label: "Movimientos",
-              icon: "pi pi-fw pi-exchange",
-              to: "/autosys/inventario/movimientos",
-            },
-            {
-              label: "Órdenes de Compra",
-              icon: "pi pi-fw pi-shopping-cart",
-              to: "/autosys/inventario/ordenes-compra",
-            },
-            {
-              label: "Órdenes de Venta",
-              icon: "pi pi-fw pi-money-bill",
-              to: "/autosys/inventario/ordenes-venta",
-            },
-            {
-              label: "Reservas",
-              icon: "pi pi-fw pi-bookmark",
-              to: "/autosys/inventario/reservas",
-            },
-          ],
-        },
-        {
-          label: "CRM",
-          icon: "pi pi-fw pi-box",
-          items: [
-            {
-              label: "Clientes",
-              icon: "pi pi-fw pi-users",
-              to: "/autosys/crm/clientes",
-            },
-            {
-              label: "Vehículos",
-              icon: "pi pi-fw pi-car",
+              label: "configuraciones",
+              icon: "pi pi-fw pi-cog",
               items: [
                 {
-                  label: "Vehículos",
-                  icon: "pi pi-fw pi-car",
-                  to: "/autosys/crm/vehiculos/",
+                  label: "categorias",
+                  icon: "pi pi-fw pi-tags",
+                  to: "/autosys/inventario/categorias",
                 },
                 {
-                  label: "Marcas",
-                  icon: "pi pi-fw pi-tag",
-                  to: "/autosys/crm/vehiculos/marcas",
+                  label: "marcas",
+                  icon: "pi pi-fw pi-flag",
+                  to: "/autosys/inventario/marcas",
                 },
                 {
-                  label: "Modelos",
-                  icon: "pi pi-fw pi-list",
-                  to: "/autosys/crm/vehiculos/modelos",
+                  label: "modelos",
+                  icon: "pi pi-fw pi-book",
+                  to: "/autosys/inventario/modelos",
+                },
+                {
+                  label: "unidades de medida",
+                  icon: "pi pi-fw pi-box",
+                  to: "/autosys/inventario/unidades",
+                },
+                {
+                  label: "proveedores",
+                  icon: "pi pi-fw pi-users",
+                  to: "/autosys/inventario/proveedores",
+                },
+                {
+                  label: "almacenes",
+                  icon: "pi pi-fw pi-database",
+                  to: "/autosys/inventario/almacenes",
+                },
+              ],
+            },
+            {
+              label: "operaciones diarias",
+              icon: "pi pi-fw pi-refresh",
+              items: [
+                {
+                  label: "artículos",
+                  icon: "pi pi-fw pi-box",
+                  to: "/autosys/inventario/items",
+                },
+                {
+                  label: "stock actual",
+                  icon: "pi pi-fw pi-chart-bar",
+                  to: "/autosys/inventario/stock",
+                },
+                {
+                  label: "movimientos",
+                  icon: "pi pi-fw pi-exchange",
+                  to: "/autosys/inventario/movimientos",
+                },
+              ],
+            },
+            {
+              label: "compras y ventas",
+              icon: "pi pi-fw pi-shopping-cart",
+              items: [
+                {
+                  label: "órdenes de compra",
+                  icon: "pi pi-fw pi-shopping-cart",
+                  to: "/autosys/inventario/ordenes-compra",
+                },
+                {
+                  label: "órdenes de venta",
+                  icon: "pi pi-fw pi-money-bill",
+                  to: "/autosys/inventario/ordenes-venta",
+                },
+                {
+                  label: "reservas",
+                  icon: "pi pi-fw pi-bookmark",
+                  to: "/autosys/inventario/reservas",
                 },
               ],
             },
           ],
         },
+
+        // =============================================
+        // MÓDULO: CRM (CLIENTES Y VEHÍCULOS)
+        // =============================================
         {
-          label: "Taller",
+          label: "crm",
+          icon: "pi pi-fw pi-users",
+          items: [
+            {
+              label: "configuraciones",
+              icon: "pi pi-fw pi-cog",
+              items: [
+                {
+                  label: "marcas de vehículos",
+                  icon: "pi pi-fw pi-tag",
+                  to: "/autosys/crm/vehiculos/marcas",
+                },
+                {
+                  label: "modelos de vehículos",
+                  icon: "pi pi-fw pi-list",
+                  to: "/autosys/crm/vehiculos/modelos",
+                },
+              ],
+            },
+            {
+              label: "gestión de datos",
+              icon: "pi pi-fw pi-database",
+              items: [
+                {
+                  label: "clientes",
+                  icon: "pi pi-fw pi-users",
+                  to: "/autosys/crm/clientes",
+                },
+                {
+                  label: "vehículos",
+                  icon: "pi pi-fw pi-car",
+                  to: "/autosys/crm/vehiculos/",
+                },
+              ],
+            },
+          ],
+        },
+
+        // =============================================
+        // MÓDULO: TALLER
+        // =============================================
+        {
+          label: "taller",
           icon: "pi pi-fw pi-wrench",
           items: [
             {
-              label: "Operaciones",
+              label: "configuraciones",
               icon: "pi pi-fw pi-cog",
-              to: "/autosys/operation/service-bays",
+              items: [
+                {
+                  label: "categorías de servicios",
+                  icon: "pi pi-fw pi-tags",
+                  to: "/autosys/workshop/service-categories",
+                },
+                {
+                  label: "subcategorías de servicios",
+                  icon: "pi pi-fw pi-tag",
+                  to: "/autosys/workshop/service-subcategories",
+                },
+                {
+                  label: "estados de órdenes",
+                  icon: "pi pi-fw pi-tags",
+                  to: "/autosys/workshop/work-order-statuses",
+                },
+                {
+                  label: "servicios",
+                  icon: "pi pi-fw pi-cog",
+                  to: "/autosys/workshop/services",
+                },
+              ],
             },
             {
-              label: "Órdenes de Trabajo",
-              icon: "pi pi-fw pi-file-edit",
-              to: "/autosys/workshop",
+              label: "operaciones diarias",
+              icon: "pi pi-fw pi-refresh",
+              items: [
+                {
+                  label: "bahías de servicio",
+                  icon: "pi pi-fw pi-cog",
+                  to: "/autosys/operation/service-bays",
+                },
+                {
+                  label: "dashboard órdenes de trabajo",
+                  icon: "pi pi-fw pi-chart-line",
+                  to: "/autosys/operation/workshop",
+                },
+                {
+                  label: "gestión órdenes de trabajo",
+                  icon: "pi pi-fw pi-file-edit",
+                  to: "/autosys/workshop",
+                },
+                {
+                  label: "gestión de puestos",
+                  icon: "pi pi-fw pi-sitemap",
+                  to: "/autosys/workshop/service-bays",
+                },
+              ],
             },
             {
-              label: "Gestión de Puestos",
-              icon: "pi pi-fw pi-sitemap",
-              to: "/autosys/workshop/service-bays",
+              label: "facturación y pagos",
+              icon: "pi pi-fw pi-dollar",
+              items: [
+                {
+                  label: "facturas",
+                  icon: "pi pi-fw pi-file",
+                  to: "/autosys/workshop/invoices",
+                },
+                {
+                  label: "pagos",
+                  icon: "pi pi-fw pi-money-bill",
+                  to: "/autosys/workshop/payments",
+                },
+              ],
+            },
+          ],
+        },
+
+        // =============================================
+        // MÓDULO: FINANZAS
+        // =============================================
+        {
+          label: "finanzas",
+          icon: "pi pi-fw pi-dollar",
+          items: [
+            {
+              label: "análisis financiero",
+              icon: "pi pi-fw pi-chart-line",
+              items: [
+                {
+                  label: "dashboard financiero",
+                  icon: "pi pi-fw pi-chart-line",
+                  to: "/autosys/finance",
+                },
+              ],
             },
             {
-              label: "Facturas",
-              icon: "pi pi-fw pi-file",
-              to: "/autosys/workshop/invoices",
+              label: "gestión de cuentas",
+              icon: "pi pi-fw pi-wallet",
+              items: [
+                {
+                  label: "cuentas por cobrar",
+                  icon: "pi pi-fw pi-arrow-up",
+                  to: "/autosys/finance/cuentas-cobrar",
+                },
+                {
+                  label: "cuentas por pagar",
+                  icon: "pi pi-fw pi-arrow-down",
+                  to: "/autosys/finance/cuentas-pagar",
+                },
+              ],
+            },
+          ],
+        },
+
+        // =============================================
+        // MÓDULO: CONFIGURACIÓN GENERAL
+        // =============================================
+        {
+          label: "configuracion",
+          icon: "pi pi-fw pi-cog",
+          items: [
+            {
+              label: "sistema",
+              icon: "pi pi-fw pi-server",
+              items: [
+                {
+                  label: "configuración general",
+                  icon: "pi pi-fw pi-cog",
+                  to: "/autosys/configuracion/general",
+                },
+                {
+                  label: "usuarios y permisos",
+                  icon: "pi pi-fw pi-users",
+                  to: "/autosys/configuracion/usuarios",
+                },
+              ],
             },
             {
-              label: "Pagos",
-              icon: "pi pi-fw pi-money-bill",
-              to: "/autosys/workshop/payments",
-            },
-            {
-              label: "Servicios",
-              icon: "pi pi-fw pi-cog",
-              to: "/autosys/workshop/services",
-            },
-            {
-              label: "Categorías de Servicios",
-              icon: "pi pi-fw pi-tags",
-              to: "/autosys/workshop/service-categories",
-            },
-            {
-              label: "Subcategorías de Servicios",
-              icon: "pi pi-fw pi-tag",
-              to: "/autosys/workshop/service-subcategories",
-            },
-            {
-              label: "Estados de Orden de Trabajo",
-              icon: "pi pi-fw pi-tags",
-              to: "/autosys/workshop/work-order-statuses",
+              label: "reportes y analíticas",
+              icon: "pi pi-fw pi-chart-bar",
+              items: [
+                {
+                  label: "reportes financieros",
+                  icon: "pi pi-fw pi-file-pdf",
+                  to: "/autosys/reportes/financieros",
+                },
+                {
+                  label: "reportes de operaciones",
+                  icon: "pi pi-fw pi-chart-line",
+                  to: "/autosys/reportes/operaciones",
+                },
+                {
+                  label: "reportes de inventario",
+                  icon: "pi pi-fw pi-box",
+                  to: "/autosys/reportes/inventario",
+                },
+              ],
             },
           ],
         },
