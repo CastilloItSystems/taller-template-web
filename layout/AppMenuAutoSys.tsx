@@ -261,6 +261,36 @@ const AppMenuAutoSys = () => {
         },
 
         // =============================================
+        // MÓDULO: CONCESIONARIO
+        // =============================================
+        {
+          label: "concesionario",
+          icon: "pi pi-fw pi-car",
+          items: [
+            {
+              label: "dashboard",
+              icon: "pi pi-fw pi-chart-line",
+              to: "/autosys/concesionario",
+            },
+            {
+              label: "inventario de vehículos",
+              icon: "pi pi-fw pi-car",
+              to: "/autosys/concesionario/vehicles",
+            },
+            {
+              label: "cotizaciones",
+              icon: "pi pi-fw pi-file-text",
+              to: "/autosys/concesionario/quotes",
+            },
+            {
+              label: "financiamiento",
+              icon: "pi pi-fw pi-money-bill",
+              to: "/autosys/concesionario/financing",
+            },
+          ],
+        },
+
+        // =============================================
         // MÓDULO: FINANZAS
         // =============================================
         {
