@@ -1,9 +1,8 @@
 {
-  "functions": {
-    "app/api/auth/[...nextauth]/route.ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/api/auth/:path*",
