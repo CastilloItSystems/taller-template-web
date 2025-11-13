@@ -10,7 +10,13 @@ export type SalesOrderStatus =
 
 export interface SalesLine {
   _id?: string;
-  item: string; // Item id or populated object
+  item:
+    | string
+    | {
+        _id: string;
+        nombre: string;
+        codigo?: string;
+      }; // Item id or populated object
   cantidad: number;
   precioUnitario: number;
   reservado?: number;
@@ -31,14 +37,17 @@ export interface SalesReservation {
   };
   cantidad: number;
   estado: "activo" | "liberado" | "consumido" | "cancelado";
-  origenTipo: string;
-  origen: string;
+  eliminado?: boolean;
+  historial?: any[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SalesOrder {
-  id: string;
+  _id?: string;
+  id?: string; // For backward compatibility
   numero: string; // unique
-  cliente?: Customer;
+  customer?: string | Customer; // Customer id or populated object
   fecha: string;
   estado: SalesOrderStatus;
   items: SalesLine[];
@@ -57,6 +66,7 @@ export interface SalesOrder {
   // Audit
   creadoPor?: string;
   eliminado?: boolean;
+  historial?: any[];
   createdAt?: string;
   updatedAt?: string;
 }

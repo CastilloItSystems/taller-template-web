@@ -168,3 +168,44 @@ export interface AccountsReceivableReport {
   overdueAmount: number;
   invoices: Invoice[];
 }
+
+// Work Order History
+export interface WorkOrderHistory {
+  _id: string;
+  workOrder: {
+    _id: string;
+    numeroOrden: string;
+    diasTranscurridos: number | null;
+    id: string;
+  };
+  tipo:
+    | "cambio_estado"
+    | "modificado_item"
+    | "completado_item"
+    | "eliminado_item"
+    | "actualizacion_costos"
+    | "creado"
+    | "actualizado";
+  descripcion: string;
+  usuario: {
+    _id: string;
+    nombre: string;
+    id: string;
+  };
+  detalles?: any;
+  estadoAnterior?: any;
+  estadoNuevo?: any;
+  notas?: string;
+  fecha: string;
+  itemAfectado?: {
+    _id: string;
+    tipo: string;
+    cantidad?: number;
+  };
+  costoAdicional?: number;
+  eliminado: boolean;
+  archivosAdjuntos?: any[];
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+}

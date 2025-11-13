@@ -18,7 +18,8 @@ export interface ItemModel {
 }
 
 export interface Item {
-  id: string;
+  _id?: string;
+  id?: string; // For backward compatibility
   sku?: string;
   codigo?: string;
   nombre: string;

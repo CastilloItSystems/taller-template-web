@@ -35,14 +35,19 @@ export const getPaymentsByInvoice = async (
 ): Promise<PaymentSummary> => {
   const response = await apiClient.get<{
     success: boolean;
-    payments: Payment[];
-    total: number;
+    data: Payment[];
   }>(`${BASE_URL}/invoice/${invoiceId}`);
 
+  const payments = response.data.data;
+  const totalAmount = payments.reduce(
+    (sum, payment) => sum + payment.amount,
+    0
+  );
+
   return {
-    payments: response.data.payments,
-    totalAmount: response.data.total,
-    totalPayments: response.data.payments.length,
+    payments: payments,
+    totalAmount: totalAmount,
+    totalPayments: payments.length,
   };
 };
 

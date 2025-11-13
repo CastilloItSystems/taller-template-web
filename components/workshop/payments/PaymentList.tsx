@@ -143,10 +143,25 @@ export default function PaymentList() {
     return (
       <div>
         <div style={{ fontFamily: "monospace", fontWeight: "bold" }}>
-          {invoice.invoiceNumber}
+          {typeof invoice.invoiceNumber === "string"
+            ? invoice.invoiceNumber
+            : "N/A"}
         </div>
         <div className="text-sm text-gray-500">
-          Total: {formatCurrency(invoice.total)}
+          Total:{" "}
+          {formatCurrency(
+            typeof invoice.total === "number" ? invoice.total : 0
+          )}
+        </div>
+        <div className="text-sm text-gray-500">
+          Pagado:{" "}
+          {formatCurrency(
+            typeof invoice.paidAmount === "number" ? invoice.paidAmount : 0
+          )}{" "}
+          • Saldo:{" "}
+          {formatCurrency(
+            typeof invoice.balance === "number" ? invoice.balance : 0
+          )}
         </div>
       </div>
     );
@@ -156,7 +171,9 @@ export default function PaymentList() {
   const amountBodyTemplate = (rowData: Payment) => {
     return (
       <span style={{ fontWeight: "bold", color: "#10b981" }}>
-        {formatCurrency(rowData.amount)}
+        {formatCurrency(
+          typeof rowData.amount === "number" ? rowData.amount : 0
+        )}
       </span>
     );
   };
@@ -168,7 +185,7 @@ export default function PaymentList() {
 
   // Template for paymentMethod column
   const methodBodyTemplate = (rowData: Payment) => {
-    const methodLabels: Record<PaymentMethod, string> = {
+    const methodLabels: Record<string, string> = {
       efectivo: "Efectivo",
       transferencia: "Transferencia",
       tarjeta_credito: "Tarjeta Crédito",
@@ -178,7 +195,7 @@ export default function PaymentList() {
       otro: "Otro",
     };
 
-    const methodColors: Record<PaymentMethod, string> = {
+    const methodColors: Record<string, string> = {
       efectivo: "success",
       transferencia: "info",
       tarjeta_credito: "warning",
@@ -188,34 +205,40 @@ export default function PaymentList() {
       otro: "secondary",
     };
 
+    const method =
+      typeof rowData.paymentMethod === "string"
+        ? rowData.paymentMethod
+        : "otro";
     return (
       <Tag
-        value={methodLabels[rowData.paymentMethod]}
-        severity={methodColors[rowData.paymentMethod] as any}
+        value={methodLabels[method] || method}
+        severity={(methodColors[method] as any) || "secondary"}
       />
     );
   };
 
   // Template for status column
   const statusBodyTemplate = (rowData: Payment) => {
-    const statusLabels: Record<PaymentStatus, string> = {
+    const statusLabels: Record<string, string> = {
       pendiente: "Pendiente",
       confirmado: "Confirmado",
       rechazado: "Rechazado",
       reembolsado: "Reembolsado",
     };
 
-    const statusColors: Record<PaymentStatus, string> = {
+    const statusColors: Record<string, string> = {
       pendiente: "warning",
       confirmado: "success",
       rechazado: "danger",
       reembolsado: "info",
     };
 
+    const status =
+      typeof rowData.status === "string" ? rowData.status : "pendiente";
     return (
       <Tag
-        value={statusLabels[rowData.status]}
-        severity={statusColors[rowData.status] as any}
+        value={statusLabels[status] || status}
+        severity={(statusColors[status] as any) || "warning"}
       />
     );
   };
@@ -232,20 +255,29 @@ export default function PaymentList() {
   };
 
   // Helper functions
-  const formatCurrency = (value: number): string => {
+  const formatCurrency = (value: any): string => {
+    const numValue = typeof value === "number" ? value : 0;
     return new Intl.NumberFormat("es-VE", {
       style: "currency",
       currency: "VES",
       minimumFractionDigits: 2,
-    }).format(value);
+    }).format(numValue);
   };
 
-  const formatDate = (date: Date | string): string => {
-    return new Date(date).toLocaleDateString("es-VE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+  const formatDate = (date: any): string => {
+    try {
+      const dateObj =
+        date instanceof Date || typeof date === "string"
+          ? new Date(date)
+          : new Date();
+      return dateObj.toLocaleDateString("es-VE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } catch {
+      return "-";
+    }
   };
 
   // Payment method options for filter

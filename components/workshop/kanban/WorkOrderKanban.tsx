@@ -36,6 +36,7 @@ import {
 } from "@/app/api/workshop/workOrderService";
 import KanbanColumn from "./KanbanColumn";
 import KanbanCard from "./KanbanCard";
+import WorkOrderHistoryDialog from "../work-orders/WorkOrderHistoryDialog";
 
 export default function WorkOrderKanban() {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
@@ -46,6 +47,12 @@ export default function WorkOrderKanban() {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(
     null
   );
+  const [historyDialog, setHistoryDialog] = useState<boolean>(false);
+  const [selectedWorkOrderForHistory, setSelectedWorkOrderForHistory] =
+    useState<{
+      id: string;
+      numero: string;
+    } | null>(null);
   const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(
     new Set()
   );
@@ -351,6 +358,22 @@ export default function WorkOrderKanban() {
     setSelectedWorkOrder(null);
   };
 
+  const handleHistoryClick = (workOrder: WorkOrder) => {
+    const id = workOrder._id || workOrder.id;
+    if (id) {
+      setSelectedWorkOrderForHistory({
+        id,
+        numero: workOrder.numeroOrden,
+      });
+      setHistoryDialog(true);
+    }
+  };
+
+  const hideHistoryDialog = () => {
+    setHistoryDialog(false);
+    setSelectedWorkOrderForHistory(null);
+  };
+
   const toggleColumnCollapse = (statusId: string) => {
     setCollapsedColumns((prev) => {
       const newSet = new Set(prev);
@@ -573,6 +596,7 @@ export default function WorkOrderKanban() {
                 status={status}
                 workOrders={getWorkOrdersByStatus(status._id)}
                 onCardClick={handleCardClick}
+                onHistoryClick={handleHistoryClick}
                 isCollapsed={collapsedColumns.has(status._id)}
                 onToggleCollapse={() => toggleColumnCollapse(status._id)}
               />
@@ -737,6 +761,14 @@ export default function WorkOrderKanban() {
           <WorkOrderDetails workOrder={selectedWorkOrder} />
         )}
       </Dialog>
+
+      {/* History Dialog */}
+      <WorkOrderHistoryDialog
+        visible={historyDialog}
+        workOrderId={selectedWorkOrderForHistory?.id || null}
+        workOrderNumber={selectedWorkOrderForHistory?.numero || ""}
+        onHide={hideHistoryDialog}
+      />
     </motion.div>
   );
 }

@@ -12,6 +12,7 @@ export interface InvoiceReference {
   _id: string;
   invoiceNumber: string;
   total: number;
+  paidAmount: number;
   balance: number;
   status: string;
   id?: string;
@@ -69,6 +70,7 @@ export interface Payment {
   eliminado: boolean;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  __v?: number;
 }
 
 /**

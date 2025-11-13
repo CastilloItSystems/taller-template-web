@@ -30,12 +30,14 @@ interface PaymentFormProps {
   payment: Payment | null;
   onSave: () => void;
   onCancel: () => void;
+  preselectedInvoice?: Invoice | null; // Nueva prop opcional
 }
 
 export default function PaymentForm({
   payment,
   onSave,
   onCancel,
+  preselectedInvoice = null,
 }: PaymentFormProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,11 +54,13 @@ export default function PaymentForm({
   } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      invoice: payment?.invoice
-        ? typeof payment.invoice === "string"
-          ? payment.invoice
-          : payment.invoice._id
-        : "",
+      invoice:
+        preselectedInvoice?._id ||
+        (payment?.invoice
+          ? typeof payment.invoice === "string"
+            ? payment.invoice
+            : payment.invoice._id
+          : ""),
       amount: payment?.amount || 0,
       paymentDate: payment?.paymentDate
         ? new Date(payment.paymentDate)
@@ -77,11 +81,37 @@ export default function PaymentForm({
   }, []);
 
   useEffect(() => {
-    if (selectedInvoiceId) {
-      const invoice = invoices.find((inv) => inv._id === selectedInvoiceId);
-      setSelectedInvoice(invoice || null);
+    if (preselectedInvoice) {
+      // Si hay una factura preseleccionada, la agregamos a la lista si no está
+      const sanitizedInvoice = {
+        ...preselectedInvoice,
+        invoiceNumber:
+          typeof preselectedInvoice.invoiceNumber === "string"
+            ? preselectedInvoice.invoiceNumber
+            : "N/A",
+        balance:
+          typeof preselectedInvoice.balance === "number"
+            ? preselectedInvoice.balance
+            : 0,
+        total:
+          typeof preselectedInvoice.total === "number"
+            ? preselectedInvoice.total
+            : 0,
+        paidAmount:
+          typeof preselectedInvoice.paidAmount === "number"
+            ? preselectedInvoice.paidAmount
+            : 0,
+      };
+      setSelectedInvoice(sanitizedInvoice);
+      setInvoices((prev) => {
+        const exists = prev.find((inv) => inv._id === preselectedInvoice._id);
+        if (!exists) {
+          return [sanitizedInvoice, ...prev];
+        }
+        return prev;
+      });
     }
-  }, [selectedInvoiceId, invoices]);
+  }, [preselectedInvoice]);
 
   const loadInvoices = async () => {
     try {
@@ -92,9 +122,18 @@ export default function PaymentForm({
         limit: 1000,
       });
       // Filter invoices that have balance > 0
-      const unpaidInvoices = response.data.docs.filter(
-        (inv) => inv.balance > 0 || inv._id === payment?.invoice
-      );
+      const unpaidInvoices = response.data.docs
+        .filter((inv) => inv.balance > 0 || inv._id === payment?.invoice)
+        .map((inv) => ({
+          ...inv,
+          invoiceNumber:
+            typeof inv.invoiceNumber === "string" ? inv.invoiceNumber : "N/A",
+          balance: typeof inv.balance === "number" ? inv.balance : 0,
+          total: typeof inv.total === "number" ? inv.total : 0,
+          paidAmount: typeof inv.paidAmount === "number" ? inv.paidAmount : 0,
+          displayLabel:
+            typeof inv.invoiceNumber === "string" ? inv.invoiceNumber : "N/A",
+        }));
       setInvoices(unpaidInvoices);
     } catch (error) {
       console.error("Error loading invoices:", error);
@@ -159,21 +198,35 @@ export default function PaymentForm({
     return (
       <div className="flex flex-column">
         <span style={{ fontFamily: "monospace", fontWeight: "bold" }}>
-          {option.invoiceNumber}
+          {typeof option.invoiceNumber === "string"
+            ? option.invoiceNumber
+            : "N/A"}
         </span>
         <span className="text-sm text-gray-500">
-          Balance: {formatCurrency(option.balance)}
+          Balance:{" "}
+          {formatCurrency(
+            typeof option.balance === "number" ? option.balance : 0
+          )}
         </span>
       </div>
     );
   };
 
-  const formatCurrency = (value: number): string => {
+  const formatCurrency = (value: any): string => {
+    const numValue = typeof value === "number" ? value : 0;
     return new Intl.NumberFormat("es-VE", {
       style: "currency",
       currency: "VES",
       minimumFractionDigits: 2,
-    }).format(value);
+    }).format(numValue);
+  };
+
+  // Invoice value template for dropdown
+  const invoiceValueTemplate = (option: Invoice | undefined) => {
+    if (!option) return "Seleccione una factura";
+    return typeof option.invoiceNumber === "string"
+      ? option.invoiceNumber
+      : "N/A";
   };
 
   // Render payment details fields based on selected method
@@ -355,17 +408,17 @@ export default function PaymentForm({
                 id="invoice"
                 {...field}
                 options={invoices}
-                optionLabel="invoiceNumber"
+                optionLabel="displayLabel"
                 optionValue="_id"
                 placeholder="Seleccione una factura"
                 filter
                 filterBy="invoiceNumber"
                 itemTemplate={invoiceItemTemplate}
-                valueTemplate={(option) => {
-                  if (!option) return "Seleccione una factura";
-                  const invoice = invoices.find((inv) => inv._id === option);
-                  return invoice ? invoice.invoiceNumber : option;
-                }}
+                valueTemplate={() =>
+                  invoiceValueTemplate(
+                    invoices.find((inv) => inv._id === field.value)!
+                  )
+                }
                 loading={loadingInvoices}
                 disabled={!!payment?._id}
                 className={classNames({
@@ -387,19 +440,31 @@ export default function PaymentForm({
                 <div className="col-4">
                   <span className="text-500 text-sm">Total Factura:</span>
                   <div className="text-xl font-bold">
-                    {formatCurrency(selectedInvoice.total)}
+                    {formatCurrency(
+                      typeof selectedInvoice.total === "number"
+                        ? selectedInvoice.total
+                        : 0
+                    )}
                   </div>
                 </div>
                 <div className="col-4">
                   <span className="text-500 text-sm">Pagado:</span>
                   <div className="text-xl font-bold text-green-500">
-                    {formatCurrency(selectedInvoice.paidAmount || 0)}
+                    {formatCurrency(
+                      typeof selectedInvoice.paidAmount === "number"
+                        ? selectedInvoice.paidAmount
+                        : 0
+                    )}
                   </div>
                 </div>
                 <div className="col-4">
                   <span className="text-500 text-sm">Balance Pendiente:</span>
                   <div className="text-xl font-bold text-orange-500">
-                    {formatCurrency(selectedInvoice.balance)}
+                    {formatCurrency(
+                      typeof selectedInvoice.balance === "number"
+                        ? selectedInvoice.balance
+                        : 0
+                    )}
                   </div>
                 </div>
               </div>
@@ -444,16 +509,25 @@ export default function PaymentForm({
           <Controller
             name="paymentDate"
             control={control}
-            render={({ field }) => (
-              <Calendar
-                id="paymentDate"
-                value={field.value}
-                onChange={(e) => field.onChange(e.value)}
-                dateFormat="dd/mm/yy"
-                showIcon
-                placeholder="Seleccione fecha"
-              />
-            )}
+            render={({ field }) => {
+              // Convert string dates to Date objects for Calendar component
+              const calendarValue = field.value
+                ? typeof field.value === "string"
+                  ? new Date(field.value)
+                  : field.value
+                : null;
+
+              return (
+                <Calendar
+                  id="paymentDate"
+                  value={calendarValue}
+                  onChange={(e) => field.onChange(e.value)}
+                  dateFormat="dd/mm/yy"
+                  showIcon
+                  placeholder="Seleccione fecha"
+                />
+              );
+            }}
           />
         </div>
 

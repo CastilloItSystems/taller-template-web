@@ -18,6 +18,8 @@ interface CustomActionButtonsProps<T> {
   onEdit?: (rowData: T) => void; // Acción para editar
   onDelete?: (rowData: T) => void; // Acción para eliminar
   onDuplicate?: (rowData: T) => void; // Acción para copiar
+  onViewPayments?: (rowData: T) => void; // Acción para ver pagos
+  onAddPayment?: (rowData: T) => void; // Acción para agregar pago
   /** Plantilla dinámica para generar el PDF */
   pdfTemplate?: React.ComponentType<{ data: T }>;
   /** Nombre de archivo para descarga */
@@ -35,6 +37,8 @@ function CustomActionButtons<T>(props: CustomActionButtonsProps<T>) {
     onEdit,
     onDelete,
     onDuplicate,
+    onViewPayments,
+    onAddPayment,
     pdfTemplate: Template,
     pdfFileName = "documento.pdf",
     pdfDownloadText = "Descargar PDF",
@@ -51,7 +55,9 @@ function CustomActionButtons<T>(props: CustomActionButtonsProps<T>) {
     !can(editAllowedRoles) &&
     !can(deleteAllowedRoles) &&
     !can(duplicateAllowedRoles) &&
-    !can(pdfAllowedRoles)
+    !can(pdfAllowedRoles) &&
+    !can(editAllowedRoles) && // Para ver pagos usamos edit roles
+    !can(editAllowedRoles) // Para agregar pago usamos edit roles
   ) {
     return null;
   }
@@ -97,6 +103,20 @@ function CustomActionButtons<T>(props: CustomActionButtonsProps<T>) {
       label: "Copiar Información",
       icon: "pi pi-copy",
       command: () => onDuplicate(rowData),
+    });
+  }
+  if (onViewPayments && can(editAllowedRoles)) {
+    menuItems.push({
+      label: "Ver Pagos",
+      icon: "pi pi-dollar",
+      command: () => onViewPayments(rowData),
+    });
+  }
+  if (onAddPayment && can(editAllowedRoles)) {
+    menuItems.push({
+      label: "Agregar Pago",
+      icon: "pi pi-plus",
+      command: () => onAddPayment(rowData),
     });
   }
   if (Template && can(pdfAllowedRoles)) {
@@ -187,6 +207,30 @@ function CustomActionButtons<T>(props: CustomActionButtonsProps<T>) {
           onClick={() => {
             onDuplicate(rowData);
           }}
+        />
+      )}
+      {onViewPayments && can(editAllowedRoles) && (
+        <Button
+          icon="pi pi-dollar"
+          rounded
+          size="small"
+          severity="help"
+          className="p-button-xs w-full sm:w-auto"
+          tooltip="Ver Pagos"
+          tooltipOptions={{ position: "top" }}
+          onClick={() => onViewPayments(rowData)}
+        />
+      )}
+      {onAddPayment && can(editAllowedRoles) && (
+        <Button
+          icon="pi pi-plus"
+          rounded
+          size="small"
+          severity="success"
+          className="p-button-xs w-full sm:w-auto"
+          tooltip="Agregar Pago"
+          tooltipOptions={{ position: "top" }}
+          onClick={() => onAddPayment(rowData)}
         />
       )}
       {Template && can(pdfAllowedRoles) && (

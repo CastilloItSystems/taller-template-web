@@ -16,6 +16,7 @@ import {
 } from "@/app/api/workshop/workOrderService";
 import WorkOrderForm from "./WorkOrderForm";
 import WorkOrderItemsDialog from "./WorkOrderItemsDialog";
+import WorkOrderHistoryDialog from "./WorkOrderHistoryDialog";
 import { WorkOrder } from "@/libs/interfaces/workshop";
 import CustomActionButtons from "@/components/common/CustomActionButtons";
 import CreateButton from "@/components/common/CreateButton";
@@ -30,10 +31,16 @@ const WorkOrderList = () => {
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [formDialog, setFormDialog] = useState(false);
   const [itemsDialog, setItemsDialog] = useState(false);
+  const [historyDialog, setHistoryDialog] = useState(false);
   const [selectedWorkOrderForItems, setSelectedWorkOrderForItems] = useState<{
     id: string;
     numero: string;
   } | null>(null);
+  const [selectedWorkOrderForHistory, setSelectedWorkOrderForHistory] =
+    useState<{
+      id: string;
+      numero: string;
+    } | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -110,6 +117,22 @@ const WorkOrderList = () => {
     setGlobalFilterValue(value);
   };
 
+  const openHistoryDialog = (workOrder: WorkOrder) => {
+    const id = workOrder._id || workOrder.id;
+    if (id) {
+      setSelectedWorkOrderForHistory({
+        id,
+        numero: workOrder.numeroOrden,
+      });
+      setHistoryDialog(true);
+    }
+  };
+
+  const hideHistoryDialog = () => {
+    setHistoryDialog(false);
+    setSelectedWorkOrderForHistory(null);
+  };
+
   const renderHeader = () => (
     <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
       <span className="p-input-icon-left w-full sm:w-20rem flex-order-1 sm:flex-order-0">
@@ -126,17 +149,28 @@ const WorkOrderList = () => {
   );
 
   const actionBodyTemplate = (rowData: WorkOrder) => (
-    <CustomActionButtons
-      rowData={rowData}
-      onEdit={(data) => {
-        setWorkOrder(rowData);
-        setFormDialog(true);
-      }}
-      onDelete={(data) => {
-        setWorkOrder(rowData);
-        setDeleteDialog(true);
-      }}
-    />
+    <div className="flex gap-2">
+      <CustomActionButtons
+        rowData={rowData}
+        onEdit={(data) => {
+          setWorkOrder(rowData);
+          setFormDialog(true);
+        }}
+        onDelete={(data) => {
+          setWorkOrder(rowData);
+          setDeleteDialog(true);
+        }}
+      />
+      <Button
+        icon="pi pi-history"
+        rounded
+        text
+        severity="info"
+        tooltip="Ver Historial"
+        tooltipOptions={{ position: "top" }}
+        onClick={() => openHistoryDialog(rowData)}
+      />
+    </div>
   );
 
   const numeroOrdenBodyTemplate = (rowData: WorkOrder) => (
@@ -429,6 +463,14 @@ const WorkOrderList = () => {
           setItemsDialog(false);
           setSelectedWorkOrderForItems(null);
         }}
+      />
+
+      {/* History Dialog */}
+      <WorkOrderHistoryDialog
+        visible={historyDialog}
+        workOrderId={selectedWorkOrderForHistory?.id || null}
+        workOrderNumber={selectedWorkOrderForHistory?.numero || ""}
+        onHide={hideHistoryDialog}
       />
     </>
   );

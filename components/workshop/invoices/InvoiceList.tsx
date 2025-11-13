@@ -21,6 +21,8 @@ import { motion } from "framer-motion";
 import CreateButton from "@/components/common/CreateButton";
 import CustomActionButtons from "@/components/common/CustomActionButtons";
 import InvoiceForm from "./InvoiceForm";
+import InvoicePaymentsDialog from "./InvoicePaymentsDialog";
+import PaymentForm from "../payments/PaymentForm";
 
 const InvoiceList: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -36,6 +38,12 @@ const InvoiceList: React.FC = () => {
   });
   const [formDialog, setFormDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [paymentsDialog, setPaymentsDialog] = useState<boolean>(false);
+  const [paymentDialog, setPaymentDialog] = useState<boolean>(false);
+  const [selectedInvoiceForPayments, setSelectedInvoiceForPayments] =
+    useState<Invoice | null>(null);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
+    useState<Invoice | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
   const toast = useRef<Toast>(null);
@@ -149,6 +157,41 @@ const InvoiceList: React.FC = () => {
     }
   };
 
+  const viewPayments = (invoice: Invoice) => {
+    setSelectedInvoiceForPayments(invoice);
+    setPaymentsDialog(true);
+  };
+
+  const addPayment = (invoice: Invoice) => {
+    setSelectedInvoiceForPayment(invoice);
+    setPaymentDialog(true);
+  };
+
+  const hidePaymentsDialog = () => {
+    setPaymentsDialog(false);
+    setSelectedInvoiceForPayments(null);
+  };
+
+  const hidePaymentDialog = () => {
+    setPaymentDialog(false);
+    setSelectedInvoiceForPayment(null);
+  };
+
+  const handlePaymentSave = () => {
+    toast.current?.show({
+      severity: "success",
+      summary: "Éxito",
+      detail: "Pago registrado correctamente",
+      life: 3000,
+    });
+    loadInvoices(); // Recargar facturas para actualizar saldos
+    hidePaymentDialog();
+    // Si el dialog de pagos está abierto, recargar los pagos también
+    if (paymentsDialog && selectedInvoiceForPayments) {
+      // El dialog se recargará automáticamente por el useEffect
+    }
+  };
+
   const handleSave = () => {
     toast.current?.show({
       severity: "success",
@@ -191,26 +234,41 @@ const InvoiceList: React.FC = () => {
   );
 
   const invoiceNumberTemplate = (rowData: Invoice) => {
-    return <span className="font-mono">{rowData.invoiceNumber}</span>;
+    return (
+      <span className="font-mono">
+        {typeof rowData.invoiceNumber === "string"
+          ? rowData.invoiceNumber
+          : "N/A"}
+      </span>
+    );
   };
 
   const customerTemplate = (rowData: Invoice) => {
     if (typeof rowData.customer === "object" && rowData.customer !== null) {
-      return rowData.customer.nombreCompleto || rowData.customer.nombre;
+      // Check if it's a proper CustomerReference
+      const customer = rowData.customer as any;
+      if (customer.nombreCompleto || customer.nombre) {
+        return customer.nombreCompleto || customer.nombre;
+      }
+      // If it's not a customer object, return a fallback
+      return "Cliente desconocido";
     }
-    return rowData.customer;
+    return rowData.customer || "Cliente desconocido";
   };
 
   const workOrderTemplate = (rowData: Invoice) => {
     if (typeof rowData.workOrder === "object" && rowData.workOrder !== null) {
-      const wo = rowData.workOrder;
+      const wo = rowData.workOrder as any; // WorkOrderReference
       return (
         <div className="text-sm">
           <div className="font-semibold">OT-{wo._id?.slice(-6)}</div>
         </div>
       );
     }
-    return rowData.workOrder;
+    if (typeof rowData.workOrder === "string") {
+      return <span>OT-{rowData.workOrder.slice(-6)}</span>;
+    }
+    return <span>-</span>;
   };
 
   const dateTemplate = (date: string | Date) => {
@@ -283,12 +341,13 @@ const InvoiceList: React.FC = () => {
     );
   };
 
-  const currencyTemplate = (value: number) => {
+  const currencyTemplate = (value: any) => {
+    const numValue = typeof value === "number" ? value : 0;
     return new Intl.NumberFormat("es-VE", {
       style: "currency",
       currency: "VES",
       minimumFractionDigits: 2,
-    }).format(value || 0);
+    }).format(numValue);
   };
 
   const subtotalTemplate = (rowData: Invoice) => {
@@ -321,6 +380,8 @@ const InvoiceList: React.FC = () => {
         rowData={rowData}
         onEdit={() => editInvoice(rowData)}
         onDelete={() => confirmDeleteInvoice(rowData)}
+        onViewPayments={() => viewPayments(rowData)}
+        onAddPayment={() => addPayment(rowData)}
       />
     );
   };
@@ -488,11 +549,76 @@ const InvoiceList: React.FC = () => {
           />
           {invoice && (
             <span>
-              ¿Está seguro de eliminar la factura <b>{invoice.invoiceNumber}</b>
+              ¿Está seguro de eliminar la factura{" "}
+              <b>
+                {typeof invoice.invoiceNumber === "string"
+                  ? invoice.invoiceNumber
+                  : "N/A"}
+              </b>
               ?
             </span>
           )}
         </div>
+      </Dialog>
+
+      {/* Payments Dialog */}
+      <InvoicePaymentsDialog
+        visible={paymentsDialog}
+        invoice={selectedInvoiceForPayments}
+        onHide={hidePaymentsDialog}
+        onAddPayment={() => {
+          if (selectedInvoiceForPayments) {
+            addPayment(selectedInvoiceForPayments);
+          }
+        }}
+      />
+
+      {/* Payment Form Dialog */}
+      <Dialog
+        visible={paymentDialog}
+        style={{ width: "600px" }}
+        header={
+          <div className="mb-2 text-center md:text-left">
+            <div className="border-bottom-2 border-primary pb-2">
+              <h2 className="text-2xl font-bold text-900 mb-2 flex align-items-center justify-content-center md:justify-content-start">
+                <i className="pi pi-dollar mr-3 text-primary text-3xl"></i>
+                Registrar Pago
+              </h2>
+              {selectedInvoiceForPayment && (
+                <p className="text-sm text-600 m-0">
+                  Factura:{" "}
+                  {typeof selectedInvoiceForPayment.invoiceNumber === "string"
+                    ? selectedInvoiceForPayment.invoiceNumber
+                    : "N/A"}{" "}
+                  • Saldo:{" "}
+                  {new Intl.NumberFormat("es-VE", {
+                    style: "currency",
+                    currency: "VES",
+                    minimumFractionDigits: 2,
+                  }).format(
+                    typeof selectedInvoiceForPayment.balance === "number"
+                      ? selectedInvoiceForPayment.balance
+                      : 0
+                  )}
+                </p>
+              )}
+            </div>
+          </div>
+        }
+        modal
+        className="p-fluid"
+        onHide={hidePaymentDialog}
+        maximizable
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+      >
+        {selectedInvoiceForPayment && (
+          <PaymentForm
+            payment={null}
+            onSave={handlePaymentSave}
+            onCancel={hidePaymentDialog}
+            preselectedInvoice={selectedInvoiceForPayment}
+          />
+        )}
       </Dialog>
     </motion.div>
   );

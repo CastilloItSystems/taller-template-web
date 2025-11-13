@@ -15,6 +15,7 @@ interface KanbanColumnProps {
   status: any; // WorkOrderStatus or WorkOrderStatusReference
   workOrders: WorkOrder[];
   onCardClick: (workOrder: WorkOrder) => void;
+  onHistoryClick?: (workOrder: WorkOrder) => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
@@ -23,6 +24,7 @@ export default function KanbanColumn({
   status,
   workOrders,
   onCardClick,
+  onHistoryClick,
   isCollapsed = false,
   onToggleCollapse,
 }: KanbanColumnProps) {
@@ -204,6 +206,9 @@ export default function KanbanColumn({
                   key={workOrder._id || workOrder.id}
                   workOrder={workOrder}
                   onClick={() => onCardClick(workOrder)}
+                  onHistoryClick={
+                    onHistoryClick ? () => onHistoryClick(workOrder) : undefined
+                  }
                 />
               ))}
             </div>

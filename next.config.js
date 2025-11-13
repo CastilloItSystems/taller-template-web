@@ -4,6 +4,9 @@ const nextConfig = {
 
   // Configuración necesaria para NextAuth
   async rewrites() {
+    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+      return [];
+    }
     return [
       {
         source: "/api/auth/:path*",

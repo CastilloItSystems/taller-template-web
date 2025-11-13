@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { Badge } from "primereact/badge";
+import { Button } from "primereact/button";
 import {
   WorkOrder,
   CustomerReference,
@@ -14,9 +15,14 @@ import {
 interface KanbanCardProps {
   workOrder: WorkOrder;
   onClick: () => void;
+  onHistoryClick?: () => void;
 }
 
-export default function KanbanCard({ workOrder, onClick }: KanbanCardProps) {
+export default function KanbanCard({
+  workOrder,
+  onClick,
+  onHistoryClick,
+}: KanbanCardProps) {
   const {
     attributes,
     listeners,
@@ -171,6 +177,24 @@ export default function KanbanCard({ workOrder, onClick }: KanbanCardProps) {
             {/* Items count */}
             {workOrder.items && workOrder.items.length > 0 && (
               <Badge value={workOrder.items.length} severity="info"></Badge>
+            )}
+
+            {/* History button */}
+            {onHistoryClick && (
+              <Button
+                icon="pi pi-history"
+                rounded
+                text
+                severity="info"
+                size="small"
+                tooltip="Ver Historial"
+                tooltipOptions={{ position: "top" }}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click
+                  onHistoryClick();
+                }}
+                style={{ width: "24px", height: "24px" }}
+              />
             )}
 
             {/* Days elapsed */}

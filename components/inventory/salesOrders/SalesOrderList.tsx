@@ -98,23 +98,34 @@ const SalesOrderList = () => {
 
   const handleConfirmSuccess = (updatedOrder: any) => {
     setSalesOrders((prev) =>
-      prev.map((so) => (so.id === updatedOrder.id ? updatedOrder : so))
+      prev.map((so) =>
+        so._id === updatedOrder._id || so.id === updatedOrder.id
+          ? updatedOrder
+          : so
+      )
     );
     hideConfirmDialog();
   };
 
   const handleShipSuccess = (updatedOrder: any) => {
     setSalesOrders((prev) =>
-      prev.map((so) => (so.id === updatedOrder.id ? updatedOrder : so))
+      prev.map((so) =>
+        so._id === updatedOrder._id || so.id === updatedOrder.id
+          ? updatedOrder
+          : so
+      )
     );
     hideShipDialog();
   };
 
   const handleDelete = async () => {
     try {
-      if (salesOrder?.id) {
-        await deleteSalesOrder(salesOrder.id);
-        setSalesOrders(salesOrders.filter((val) => val.id !== salesOrder.id));
+      if (salesOrder?._id || salesOrder?.id) {
+        const orderId = (salesOrder._id || salesOrder.id)!;
+        await deleteSalesOrder(orderId);
+        setSalesOrders(
+          salesOrders.filter((val) => (val._id || val.id) !== orderId)
+        );
         toast.current?.show({
           severity: "success",
           summary: "Éxito",
@@ -213,6 +224,17 @@ const SalesOrderList = () => {
     return <Tag value={config.label} severity={config.severity} />;
   };
 
+  const customerBodyTemplate = (rowData: SalesOrder) => {
+    if (typeof rowData.customer === "object" && rowData.customer?.nombre) {
+      return rowData.customer.nombre;
+    }
+    // If customer is just an ID string, we can't display the name without additional lookup
+    // For now, return a placeholder or the ID
+    return typeof rowData.customer === "string"
+      ? rowData.customer
+      : "Cliente no especificado";
+  };
+
   const itemsCountBodyTemplate = (rowData: SalesOrder) => {
     return rowData.items.length;
   };
@@ -295,7 +317,7 @@ const SalesOrderList = () => {
         >
           <Column body={actionBodyTemplate} style={{ width: "150px" }} />
           <Column field="numero" header="Número" sortable />
-          <Column field="cliente.nombre" header="Cliente" sortable />
+          <Column header="Cliente" body={customerBodyTemplate} sortable />
           <Column field="fecha" header="Fecha" sortable />
           <Column
             field="items"

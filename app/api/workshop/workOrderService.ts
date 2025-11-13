@@ -6,6 +6,7 @@ import {
   WorkOrderResponse,
   WorkOrderItem,
 } from "@/libs/interfaces/workshop";
+import { WorkOrderHistory } from "@/libs/interfaces/workshop/workOrderMain.interface";
 import {
   WorkOrderFormData,
   WorkOrderStatusFormData,
@@ -155,5 +156,22 @@ export const deleteWorkOrderStatus = async (id: string) => {
     success: boolean;
     message: string;
   }>(`/work-order-statuses/${id}`);
+  return response.data;
+};
+
+// Work Order History
+export const getWorkOrderHistory = async (workOrderId: string) => {
+  const response = await apiClient.get<{
+    success: boolean;
+    data: WorkOrderHistory[];
+    pagination: {
+      total: number;
+      page: number;
+      pages: number;
+      limit: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }>(`${BASE_URL}/${workOrderId}/history`);
   return response.data;
 };

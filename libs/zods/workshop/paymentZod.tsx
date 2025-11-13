@@ -20,7 +20,7 @@ export const paymentDetailsSchema = z.object({
 export const paymentSchema = z.object({
   invoice: z.string().min(1, "Factura es requerida"),
   amount: z.number().min(0.01, "El monto debe ser mayor a 0"),
-  paymentDate: z.date().optional(),
+  paymentDate: z.union([z.date(), z.string()]).optional(),
   paymentMethod: z.enum(
     [
       "efectivo",

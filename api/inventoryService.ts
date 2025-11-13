@@ -200,7 +200,7 @@ export const initializeInventoryMockData = () => {
       {
         id: "SO001",
         numero: "OV-2025-001",
-        cliente: {
+        customer: {
           id: "C001",
           nombre: "Cliente A",
           telefono: "555-0201",
@@ -230,7 +230,7 @@ export const initializeInventoryMockData = () => {
       {
         id: "SO002",
         numero: "OV-2025-002",
-        cliente: {
+        customer: {
           id: "C002",
           nombre: "Cliente B",
           telefono: "555-0202",

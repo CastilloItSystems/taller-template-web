@@ -717,12 +717,12 @@ const FinanceDashboard = () => {
                 style={{ fontWeight: "bold" }}
               />
               <Column
-                field="cliente"
+                field="customer"
                 header="Cliente"
                 body={(rowData) =>
-                  typeof rowData.cliente === "string"
-                    ? rowData.cliente
-                    : rowData.cliente?.nombre
+                  typeof rowData.customer === "string"
+                    ? rowData.customer
+                    : rowData.customer?.nombre
                 }
                 sortable
               />
@@ -946,9 +946,9 @@ const FinanceDashboard = () => {
               </div>
               <div>
                 <strong>Cliente:</strong>{" "}
-                {typeof selectedSalesOrder.cliente === "string"
-                  ? selectedSalesOrder.cliente
-                  : selectedSalesOrder.cliente?.nombre}
+                {typeof selectedSalesOrder.customer === "string"
+                  ? selectedSalesOrder.customer
+                  : selectedSalesOrder.customer?.nombre}
               </div>
               <div>
                 <strong>Fecha:</strong> {formatDate(selectedSalesOrder.fecha)}
